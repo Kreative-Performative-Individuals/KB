@@ -39,7 +39,6 @@ The Phyton implementation offers a library of methods for interaction with the K
      * `input_data` (str): The input string to generate the hash code from.
   * Output:
      * `hash_code` (str): A shortened alphanumeric hash code derived from the input data.
-   
  * `get_formulas`:
   * Description: This function retrieves and unrolls formulas associated with a given KPI label.
     It recursively searches for nested KPIs in the formulas and expands them until
