@@ -15,7 +15,16 @@ At present, KPIs (pure and derived) have been defined and will be included in th
 
 Please note that the current Knowledge Base prototype currently only supports the following KPIs:
 
-* `Pure KPIs`:
-  * `blabla`  
+* Pure KPIs:
+  * Machine Usage KPIs -> Utilization KPIs -> `time_sum`, `time_avg`, `time_min`, `time_max`
+  * Energy KPIs -> Consumption KPIs -> `consumption_sum`, `consumption_avg`, `consumption_min`, `consumption_max`, `power_sum`
+  * Production KPIs -> Cycles KPIs -> `cycles_sum`, `cycles_avg`, `cycles_min`, `cycles_max`, `average_cycle_time_avg`
+  * Production KPIs -> Efficiency KPIs -> `good_cycles_sum`, `good_cycles_avg`, `good_cycles_min`, `good_cycles_max`, `bad_cycles_sum`, `bad_cycles_avg`, `bad_cycles_min`, `bad_cycles_max`
+
+ 
+* Derived KPIs:
+  * Machine Usage KPIs -> Downtime KPIs -> `non_operative_time`
+  * Energy KPIs -> Consumption KPIs -> `power_cumulative`, `power_mean`
+  * Production KPIs -> Efficiency KPIs -> `success_rate`
 
 ## Methods and Documentation
