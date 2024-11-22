@@ -1,6 +1,7 @@
 # Repository of Topic 1 - KB and KPI Ontology
 
 Version: 1.0.1
+
 Last Update: 22/11/2024
 
 Authors: Giacomo Aru (KB Design, KB Implementation), Simone Marzeddu (KB Design, KPI Selection, KB Population, Documentation)
