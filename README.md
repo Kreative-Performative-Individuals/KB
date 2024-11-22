@@ -39,16 +39,17 @@ The Phyton implementation offers a library of methods for interaction with the K
      * `input_data` (str): The input string to generate the hash code from.
   * Output:
      * `hash_code` (str): A shortened alphanumeric hash code derived from the input data.
+      
  * `get_formulas`:
-  * Description: This function retrieves and unrolls formulas associated with a given KPI label.
-    It recursively searches for nested KPIs in the formulas and expands them until
-    all formulas are fully unrolled
-  * Input Parameters: 
-     * `kpi` (str): The label of the KPI whose formula is to be retrieved and unrolled.
-     * `onto` (Ontology): An ontology object used to search for KPI entities based on their label.
-  * Output:
-     * `f_list` (list): A list of all formulas found during the unrolling process, including nested ones.
-     * `kpi_label_list` (list): A list of the original KPI labels (input `kpi` and any nested ones found).
-     * `kpi_list` (list): A list of KPI names corresponding to the formulas in `f_list`.
+   * Description: This function retrieves and unrolls formulas associated with a given KPI label.
+     It recursively searches for nested KPIs in the formulas and expands them until
+     all formulas are fully unrolled
+   * Input Parameters: 
+      * `kpi` (str): The label of the KPI whose formula is to be retrieved and unrolled.
+      * `onto` (Ontology): An ontology object used to search for KPI entities based on their label.
+   * Output:
+      * `f_list` (list): A list of all formulas found during the unrolling process, including nested ones.
+      * `kpi_label_list` (list): A list of the original KPI labels (input `kpi` and any nested ones found).
+      * `kpi_list` (list): A list of KPI names corresponding to the formulas in `f_list`.
 
 
