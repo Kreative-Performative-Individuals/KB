@@ -2,6 +2,8 @@
 
 Version: 1.1.9
 
+Authors: Giacomo Aru (KB Design, KB Implementation) Simone Marzeddu (KB Design, KPI Selection, KB Population, Documentation)
+
 ## Description
 
 This repository contains the code developed for Topic 1 and the ontology in OWL format.
