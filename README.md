@@ -1,8 +1,9 @@
 # Repository of Topic 1 - KB and KPI Ontology
 
-Version: 1.1.9
+Version: 1.0.1
+Last Update: 22/11/2024
 
-Authors: Giacomo Aru (KB Design, KB Implementation) Simone Marzeddu (KB Design, KPI Selection, KB Population, Documentation)
+Authors: Giacomo Aru (KB Design, KB Implementation), Simone Marzeddu (KB Design, KPI Selection, KB Population, Documentation)
 
 ## Description
 
@@ -28,3 +29,15 @@ Please note that the current Knowledge Base prototype currently only supports th
   * Financial KPIs -> Cost KPIs -> `cost_per_cycle`
 
 ## Methods and Documentation
+The Phyton implementation offers a library of methods for interaction with the Knowledge Base, with additional methods for other relevant operations. Documentation of the methods offered follows:
+
+* `generate_hash_code`:
+  * Description: Generates a compact, alphanumeric hash code for a given input string.
+    The function uses a secure SHA-256 hash algorithm and encodes the result
+    in a URL-safe Base64 format. The output is truncated for brevity.
+  * Input Parameters: 
+     * `input_data` (str): The input string to generate the hash code from.
+  * Output: `success_rate`
+     * `input_data` (str): The input string to generate the hash code from.
+
+
