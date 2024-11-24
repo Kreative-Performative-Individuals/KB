@@ -52,6 +52,7 @@ The Phyton implementation offers a library of methods for interaction with the K
       * `f_list` (list): A list of all formulas found during the unrolling process, including nested ones.
       * `kpi_label_list` (list): A list of the original KPI labels (input `kpi` and any nested ones found).
       * `kpi_list` (list): A list of KPI names corresponding to the formulas in `f_list`.
+        
  * `add_kpi`:
      * Description: Adds a new KPI (Key Performance Indicator) to the ontology if it meets the specified criteria.
        The function ensures that the KPI label does not already exist, validates the superclass, and 
