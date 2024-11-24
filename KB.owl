@@ -696,7 +696,7 @@
                 <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
             </owl:Restriction>
         </rdf:type>
-        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°sum°mo[ S°*[S°/[ R°good_cycles_sum°T°m°o° ; R°cycles_sum°T°m°o° ]] ; 100]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°sum°mo[ S°*[S°/[ R°good_cycles_sum°T°m°o° ; R°cycles_sum°T°m°o° ]] ; C°100°]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
         <dc:description xml:lang="en">This KPI  measures the proportion of successful outputs or processes to total attempts. It reflects the effectiveness and reliability of production processes, machinery, and operational practices in achieving desired outcomes without defects, rework, or waste.</dc:description>
         <webprotege:RCAkMXcvWVU8mUBbfA8m1BH xml:lang="en">%</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
         <webprotege:RCQV99kdEzyvqs86oiS9amD xml:lang="en">sum_M_O((good_cycles_sum(T,m,o)/cycles_sum(T,m,o))*100)</webprotege:RCQV99kdEzyvqs86oiS9amD>
@@ -738,7 +738,7 @@
         <dc:description xml:lang="en">This KPI represents the count of cycles where the output meets quality standards and specifications. It excludes defective, reworked, or wasted cycles, providing a clear picture of productive and value-adding operations.</dc:description>
         <webprotege:RCAkMXcvWVU8mUBbfA8m1BH xml:lang="en">#</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
         <webprotege:RCQV99kdEzyvqs86oiS9amD xml:lang="en">Pure KPI</webprotege:RCQV99kdEzyvqs86oiS9amD>
-        <rdfs:label xml:lang="en">good_cyles_sum</rdfs:label>
+        <rdfs:label xml:lang="en">good_cycles_sum</rdfs:label>
     </owl:NamedIndividual>
     
 
