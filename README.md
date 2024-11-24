@@ -32,16 +32,35 @@ Please note that the current Knowledge Base prototype currently only supports th
 ## Methods and Documentation
 The Phyton implementation offers a library of methods for interaction with the Knowledge Base, with additional methods for other relevant operations. Documentation of the methods offered follows:
 
-* <strong>generate_hash_code</strong>:
-  * Description: Generates a compact, alphanumeric hash code for a given input string.
-    The function uses a secure SHA-256 hash algorithm and encodes the result
-    in a URL-safe Base64 format. The output is truncated for brevity.
-  * Input Parameters: 
-     * `input_data` (str): The input string to generate the hash code from.
-  * Output:
-     * `hash_code` (str): A shortened alphanumeric hash code derived from the input data.
+* <strong>"start"</strong>:
+  * Description: Initializes the global ontology and related variables.
+    This function reads a configuration file to determine the most recent ontology backup, 
+    loads the corresponding ontology file, and extracts key elements for computation and reasoning.
+   
+  * Global Variables Modified:
+    * `SAVE_INT` (int): The save interval read from the configuration file.
+    * `ONTO` (Ontology): The ontology object loaded from the specified backup file.
+    * `PARSABLE_FORMULA` (OntologyClass): The ontology class representing parsable computation formulas.
+    * `HUMAN_READABLE_FORMULA` (OntologyClass): The ontology class for human-readable formulas.
+    * `UNIT_OF_MEASURE` (OntologyClass): The ontology class defining units of measurement.
+    * `DEPENDS_ON` (OntologyClass): The ontology class describing dependencies between entities.
+    * `OPERATION_CASS` (OntologyClass): The ontology class representing operations.
+    * `MACHINE_CASS` (OntologyClass): The ontology class representing machines.
+    * `KPI_CLASS` (OntologyClass): The ontology class representing Key Performance Indicators (KPIs).
+
+  * Process:
+    1. Reads the configuration file to retrieve the save interval.
+    2. Loads the ontology corresponding to the latest backup based on the save interval.
+    3. Extracts essential classes from the ontology based on their labels.
+
+  * Raises:
+    * `IndexError`: If the specified label search in the ontology does not return a result.
+    * `ValueError`: If the configuration file does not contain a valid integer.
+
+  * Prints:
+    * Confirmation message when the ontology is successfully loaded and initialized.
       
- * <strong>get_formulas</strong>:
+ * <strong>"get_formulas"</strong>:
    * Description: This function retrieves and unrolls formulas associated with a given KPI label.
      It recursively searches for nested KPIs in the formulas and expands them until
      all formulas are fully unrolled
@@ -53,7 +72,7 @@ The Phyton implementation offers a library of methods for interaction with the K
       * `kpi_label_list` (list): A list of the original KPI labels (input `kpi` and any nested ones found).
       * `kpi_list` (list): A list of KPI names corresponding to the formulas in `f_list`.
         
- * <strong>add_kpi</strong>:
+ * <strong>"add_kpi"</strong>:
      * Description: Adds a new KPI (Key Performance Indicator) to the ontology if it meets the specified criteria.
        The function ensures that the KPI label does not already exist, validates the superclass, and 
        associates formulas and dependencies with the new KPI.
@@ -71,5 +90,4 @@ The Phyton implementation offers a library of methods for interaction with the K
       * Side Effects:
         * Modifies the ontology to add the new KPI.
         * Updates global mappings (e.g., HUMAN_READABLE_FORMULA, PARSABLE_FORMULA).
-
 
