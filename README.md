@@ -47,18 +47,8 @@ The Phyton implementation offers a library of methods for interaction with the K
     * `OPERATION_CASS` (OntologyClass): The ontology class representing operations.
     * `MACHINE_CASS` (OntologyClass): The ontology class representing machines.
     * `KPI_CLASS` (OntologyClass): The ontology class representing Key Performance Indicators (KPIs).
-
-  * Process:
-    1. Reads the configuration file to retrieve the save interval.
-    2. Loads the ontology corresponding to the latest backup based on the save interval.
-    3. Extracts essential classes from the ontology based on their labels.
-
-  * Raises:
-    * `IndexError`: If the specified label search in the ontology does not return a result.
-    * `ValueError`: If the configuration file does not contain a valid integer.
-
-  * Prints:
-    * Confirmation message when the ontology is successfully loaded and initialized.
+  * Output:
+        * `None`
       
  * <strong>"get_formulas"</strong>:
    * Description: This function retrieves and unrolls formulas associated with a given KPI label.
@@ -90,4 +80,9 @@ The Phyton implementation offers a library of methods for interaction with the K
       * Side Effects:
         * Modifies the ontology to add the new KPI.
         * Updates global mappings (e.g., HUMAN_READABLE_FORMULA, PARSABLE_FORMULA).
+
+ * <strong>"get_onto_path"</strong>:
+      * Description: Constructs and returns the file path to the last ontology backup file.
+      * Output:
+        * `pathlib.Path`: The full file path to the ontology file, as a `Path` object.
 
