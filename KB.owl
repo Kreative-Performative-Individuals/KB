@@ -1352,14 +1352,6 @@
     
 
 
-    <!-- http://webprotege.stanford.edu/ReLc8GQxmTossehsx2UQtj -->
-
-    <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/ReLc8GQxmTossehsx2UQtj">
-        <rdfs:label xml:lang="en">data</rdfs:label>
-    </owl:NamedIndividual>
-    
-
-
     <!-- http://webprotege.stanford.edu/Rf2C9penfngCh9SWMAHM3j -->
 
     <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/Rf2C9penfngCh9SWMAHM3j">
