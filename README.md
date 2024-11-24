@@ -32,7 +32,7 @@ Please note that the current Knowledge Base prototype currently only supports th
 ## Methods and Documentation
 The Phyton implementation offers a library of methods for interaction with the Knowledge Base, with additional methods for other relevant operations. Documentation of the methods offered follows:
 
-* <strong>start</strong>:
+* <strong>"start"</strong>:
   * Description: Initializes the global ontology and related variables.
     This function reads a configuration file to determine the most recent ontology backup, 
     loads the corresponding ontology file, and extracts key elements for computation and reasoning.
@@ -60,7 +60,7 @@ The Phyton implementation offers a library of methods for interaction with the K
   * Prints:
     * Confirmation message when the ontology is successfully loaded and initialized.
     
-* <strong>generate_hash_code</strong>:
+* <strong>"generate_hash_code"</strong>:
   * Description: Generates a compact, alphanumeric hash code for a given input string.
     The function uses a secure SHA-256 hash algorithm and encodes the result
     in a URL-safe Base64 format. The output is truncated for brevity.
@@ -69,7 +69,7 @@ The Phyton implementation offers a library of methods for interaction with the K
   * Output:
      * `hash_code` (str): A shortened alphanumeric hash code derived from the input data.
       
- * <strong>get_formulas</strong>:
+ * <strong>"get_formulas"</strong>:
    * Description: This function retrieves and unrolls formulas associated with a given KPI label.
      It recursively searches for nested KPIs in the formulas and expands them until
      all formulas are fully unrolled
@@ -81,7 +81,7 @@ The Phyton implementation offers a library of methods for interaction with the K
       * `kpi_label_list` (list): A list of the original KPI labels (input `kpi` and any nested ones found).
       * `kpi_list` (list): A list of KPI names corresponding to the formulas in `f_list`.
         
- * <strong>add_kpi</strong>:
+ * <strong>"add_kpi"</strong>:
      * Description: Adds a new KPI (Key Performance Indicator) to the ontology if it meets the specified criteria.
        The function ensures that the KPI label does not already exist, validates the superclass, and 
        associates formulas and dependencies with the new KPI.
