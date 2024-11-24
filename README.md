@@ -32,6 +32,34 @@ Please note that the current Knowledge Base prototype currently only supports th
 ## Methods and Documentation
 The Phyton implementation offers a library of methods for interaction with the Knowledge Base, with additional methods for other relevant operations. Documentation of the methods offered follows:
 
+* <strong>start</strong>:
+  * Description: Initializes the global ontology and related variables.
+    This function reads a configuration file to determine the most recent ontology backup, 
+    loads the corresponding ontology file, and extracts key elements for computation and reasoning.
+   
+  * Global Variables Modified:
+    * `SAVE_INT` (int): The save interval read from the configuration file.
+    * `ONTO` (Ontology): The ontology object loaded from the specified backup file.
+    * `PARSABLE_FORMULA` (OntologyClass): The ontology class representing parsable computation formulas.
+    * `HUMAN_READABLE_FORMULA` (OntologyClass): The ontology class for human-readable formulas.
+    * `UNIT_OF_MEASURE` (OntologyClass): The ontology class defining units of measurement.
+    * `DEPENDS_ON` (OntologyClass): The ontology class describing dependencies between entities.
+    * `OPERATION_CASS` (OntologyClass): The ontology class representing operations.
+    * `MACHINE_CASS` (OntologyClass): The ontology class representing machines.
+    * `KPI_CLASS` (OntologyClass): The ontology class representing Key Performance Indicators (KPIs).
+
+  * Process:
+    1. Reads the configuration file to retrieve the save interval.
+    2. Loads the ontology corresponding to the latest backup based on the save interval.
+    3. Extracts essential classes from the ontology based on their labels.
+
+  * Raises:
+    * `IndexError`: If the specified label search in the ontology does not return a result.
+    * `ValueError`: If the configuration file does not contain a valid integer.
+
+  * Prints:
+    * Confirmation message when the ontology is successfully loaded and initialized.
+    
 * <strong>generate_hash_code</strong>:
   * Description: Generates a compact, alphanumeric hash code for a given input string.
     The function uses a secure SHA-256 hash algorithm and encodes the result
