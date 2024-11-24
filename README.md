@@ -48,7 +48,7 @@ The Phyton implementation offers a library of methods for interaction with the K
     * `MACHINE_CASS` (OntologyClass): The ontology class representing machines.
     * `KPI_CLASS` (OntologyClass): The ontology class representing Key Performance Indicators (KPIs).
   * Output:
-        * `None`
+      * `None`
       
  * <strong>"get_formulas"</strong>:
    * Description: This function retrieves and unrolls formulas associated with a given KPI label.
