@@ -2,19 +2,78 @@ import owlready2 as or2
 import re
 import hashlib
 import base64
+import pathlib as pl
 
-onto = or2.get_ontology('./KB.owl').load()
+MAIN_DIR = pl.Path('./backups')
+ONTO_PATH = ['KB_original']
+CONFIG_PATH = pl.Path('./config.cfg')
 
-PARSABLE_FORMULA = onto.search(label = 'parsable_computation_formula')[0]
-HUMAN_READABLE_FORMULA = onto.search(label = 'human_readable_formula')[0]
-UNIT_OF_MEASURE = onto.search(label = 'unit_of_measure')[0]
-DEPENDS_ON = onto.search(label = 'depends_on')[0]
+ONTO = None
+SAVE_INT = None
+PARSABLE_FORMULA = None
+HUMAN_READABLE_FORMULA = None
+UNIT_OF_MEASURE = None
+DEPENDS_ON = None
+OPERATION_CASS = None
+MACHINE_CASS = None
+KPI_CLASS = None
 
-OPERATION_CASS = onto.search(label = 'operation')[0]
-MACHINE_CASS = onto.search(label = 'machine')[0]
-KPI_CLASS = onto.search(label = 'kpi')[0]
-LABEL = 'label'
 
+def start():
+    """
+    Initializes the global ontology and related variables.
+    This function reads a configuration file to determine the most recent ontology backup, 
+    loads the corresponding ontology file, and extracts key elements for computation and reasoning.
+
+    Global Variables Modified:
+    - SAVE_INT (int): The save interval read from the configuration file.
+    - ONTO (Ontology): The ontology object loaded from the specified backup file.
+    - PARSABLE_FORMULA (OntologyClass): The ontology class representing parsable computation formulas.
+    - HUMAN_READABLE_FORMULA (OntologyClass): The ontology class for human-readable formulas.
+    - UNIT_OF_MEASURE (OntologyClass): The ontology class defining units of measurement.
+    - DEPENDS_ON (OntologyClass): The ontology class describing dependencies between entities.
+    - OPERATION_CASS (OntologyClass): The ontology class representing operations.
+    - MACHINE_CASS (OntologyClass): The ontology class representing machines.
+    - KPI_CLASS (OntologyClass): The ontology class representing Key Performance Indicators (KPIs).
+
+    Process:
+    1. Reads the configuration file to retrieve the save interval.
+    2. Loads the ontology corresponding to the latest backup based on the save interval.
+    3. Extracts essential classes from the ontology based on their labels.
+
+    Raises:
+    - IndexError: If the specified label search in the ontology does not return a result.
+    - ValueError: If the configuration file does not contain a valid integer.
+
+    Prints:
+    - Confirmation message when the ontology is successfully loaded and initialized.
+    """
+    # Declare global variables to ensure modifications affect the global namespace
+    global SAVE_INT, ONTO, PARSABLE_FORMULA, HUMAN_READABLE_FORMULA
+    global UNIT_OF_MEASURE, DEPENDS_ON, OPERATION_CASS, MACHINE_CASS, KPI_CLASS
+
+    # Step 1: Read the configuration file to determine the save interval
+    with open(CONFIG_PATH, 'r') as cfg:
+        SAVE_INT = int(cfg.read())
+
+    # Step 2: Load the ontology file corresponding to the most recent backup
+    ONTO = or2.get_ontology(str(MAIN_DIR / (str(SAVE_INT - 1) + '.owl'))).load()
+
+    # Step 3: Extract specific ontology classes by their labels
+    PARSABLE_FORMULA = ONTO.search(label='parsable_computation_formula')[0]
+    HUMAN_READABLE_FORMULA = ONTO.search(label='human_readable_formula')[0]
+    UNIT_OF_MEASURE = ONTO.search(label='unit_of_measure')[0]
+    DEPENDS_ON = ONTO.search(label='depends_on')[0]
+
+    # Extract ontology classes for operations, machines, and KPIs
+    OPERATION_CASS = ONTO.search(label='operation')[0]
+    MACHINE_CASS = ONTO.search(label='machine')[0]
+    KPI_CLASS = ONTO.search(label='kpi')[0]
+
+    # Confirm successful initialization
+    print("Ontology successfully initialized!")
+
+        
 def generate_hash_code(input_data):
     """
     Generates a compact, alphanumeric hash code for a given input string.
@@ -41,7 +100,7 @@ def generate_hash_code(input_data):
     
     return hash_code
 
-def get_formulas(kpi, onto):
+def get_formulas(kpi):
     """
     This function retrieves and unrolls formulas associated with a given KPI label.
     It recursively searches for nested KPIs in the formulas and expands them until
@@ -58,7 +117,7 @@ def get_formulas(kpi, onto):
     """
     
     # Search for the KPI label in the ontology
-    target = onto.search(label=kpi)
+    target = ONTO.search(label=kpi)
     
     # Check if there is more than one match for the KPI label
     if not target or len(target) > 1:
@@ -92,7 +151,7 @@ def get_formulas(kpi, onto):
             kpi_name = re.match(r'R°([A-Za-z_]+)°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', match).group(1)
 
             # Search for the KPI name in the ontology
-            target = onto.search(label=kpi_name)
+            target = ONTO.search(label=kpi_name)
             
             # Check if there is more than one match for the KPI name
             if not target or len(target) > 1:
@@ -147,14 +206,14 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
         human_readable_formula = parsable_computation_formula
     
     # Step 1: Search for the KPI label in the ontology
-    target = onto.search(label=label)
+    target = ONTO.search(label=label)
     if target:
         # If the label already exists, print an error and terminate
         print("KPI LABEL ALREADY EXISTS")
         return
     
     # Step 2: Search for the superclass in the ontology
-    target = onto.search(label=superclass)
+    target = ONTO.search(label=superclass)
     if not target or len(target) > 1:
         # If there is no match or multiple matches for the superclass, print an error and terminate
         print("DOUBLE OR NONE REFERENCED KPI")
@@ -189,3 +248,10 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
             DEPENDS_ON[new_el] = [OPERATION_CASS]    # Associate with operation if applicable
         elif depends_on_machine:
             DEPENDS_ON[new_el] = [MACHINE_CASS]    # Associate with machine if applicable
+            
+        
+        global SAVE_INT
+        ONTO.save(file=str(MAIN_DIR / (str(SAVE_INT) + '.owl')), format="rdfxml")
+        SAVE_INT = SAVE_INT + 1
+        with open(CONFIG_PATH, 'w+') as cfg:
+            cfg.write(str(SAVE_INT))
