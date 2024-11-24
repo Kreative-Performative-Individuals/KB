@@ -35,18 +35,6 @@ def start():
     - OPERATION_CASS (OntologyClass): The ontology class representing operations.
     - MACHINE_CASS (OntologyClass): The ontology class representing machines.
     - KPI_CLASS (OntologyClass): The ontology class representing Key Performance Indicators (KPIs).
-
-    Process:
-    1. Reads the configuration file to retrieve the save interval.
-    2. Loads the ontology corresponding to the latest backup based on the save interval.
-    3. Extracts essential classes from the ontology based on their labels.
-
-    Raises:
-    - IndexError: If the specified label search in the ontology does not return a result.
-    - ValueError: If the configuration file does not contain a valid integer.
-
-    Prints:
-    - Confirmation message when the ontology is successfully loaded and initialized.
     """
     # Declare global variables to ensure modifications affect the global namespace
     global SAVE_INT, ONTO, PARSABLE_FORMULA, HUMAN_READABLE_FORMULA
@@ -74,7 +62,7 @@ def start():
     print("Ontology successfully initialized!")
 
         
-def generate_hash_code(input_data):
+def _generate_hash_code(input_data):
     """
     Generates a compact, alphanumeric hash code for a given input string.
     The function uses a secure SHA-256 hash algorithm and ensures no '-' or '_'
@@ -230,7 +218,7 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
         return
     else:
         # Step 4: Create the new KPI instance
-        new_el = target(generate_hash_code(label))  # Generate a unique identifier for the KPI
+        new_el = target(_generate_hash_code(label))  # Generate a unique identifier for the KPI
         new_el.label = [ or2.locstr(label, lang='en')]                       # Set the KPI label
         new_el.description = [or2.locstr(description, lang='en')]          # Set the KPI description
         
@@ -255,3 +243,12 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
         SAVE_INT = SAVE_INT + 1
         with open(CONFIG_PATH, 'w+') as cfg:
             cfg.write(str(SAVE_INT))
+
+def get_onto_path():
+    """
+    Constructs and returns the file path to the last ontology backup file.
+
+    Returns:
+    - pathlib.Path: The full file path to the ontology file, as a `Path` object.
+    """
+    return MAIN_DIR / (str(SAVE_INT - 1) + '.owl')
