@@ -52,5 +52,24 @@ The Phyton implementation offers a library of methods for interaction with the K
       * `f_list` (list): A list of all formulas found during the unrolling process, including nested ones.
       * `kpi_label_list` (list): A list of the original KPI labels (input `kpi` and any nested ones found).
       * `kpi_list` (list): A list of KPI names corresponding to the formulas in `f_list`.
+    
+   * `add_kpi`:
+     * Description: Adds a new KPI (Key Performance Indicator) to the ontology if it meets the specified criteria.
+       The function ensures that the KPI label does not already exist, validates the superclass, and 
+       associates formulas and dependencies with the new KPI.
+     * Input Parameters:
+        * `superclass` (str): The label of the superclass to which this KPI belongs.
+        * `label` (str): The unique label for the new KPI.
+        * `description` (str): A descriptive text explaining the KPI.
+        * `unit_of_measure` (str): The unit in which this KPI is measured.
+        * `parsable_computation_formula` (str): A machine-parsable formula for computing the KPI.
+        * `human_readable_formula` (str, optional): A human-readable formula for computing the KPI. Defaults to `parsable_computation_formula` if not provided.
+        * `depends_on_machine` (bool, optional): Indicates if the KPI depends on the machine. Defaults to False.
+        * `depends_on_operation` (bool, optional): Indicates if the KPI depends on the operation. Defaults to False.
+      * Output:
+        * `None`: Prints error messages or completes the KPI creation process.
+      * Side Effects:
+        * Modifies the ontology to add the new KPI.
+        * Updates global mappings (e.g., HUMAN_READABLE_FORMULA, PARSABLE_FORMULA).
 
 
