@@ -15,7 +15,7 @@ At present, KPIs (pure and derived) have been defined and will be included in th
 
 Please note that the current Knowledge Base prototype currently only supports the following KPIs:
 
-* Pure KPIs:
+* <strong>Pure KPIs</strong>:
   * Machine Usage KPIs -> Utilization KPIs -> `time_sum`, `time_avg`, `time_min`, `time_max`
   * Energy KPIs -> Consumption KPIs -> `consumption_sum`, `consumption_avg`, `consumption_min`, `consumption_max`, `power_sum`
   * Production KPIs -> Cycles KPIs -> `cycles_sum`, `cycles_avg`, `cycles_min`, `cycles_max`, `average_cycle_time_avg`
@@ -23,7 +23,7 @@ Please note that the current Knowledge Base prototype currently only supports th
   * Financial KPIs -> Cost KPIs -> `cost_sum`
 
  
-* Derived KPIs:
+* <strong>Derived KPIs</strong>:
   * Machine Usage KPIs -> Downtime KPIs -> `non_operative_time`
   * Energy KPIs -> Consumption KPIs -> `power_cumulative`, `power_mean`
   * Production KPIs -> Efficiency KPIs -> `success_rate`
@@ -32,7 +32,7 @@ Please note that the current Knowledge Base prototype currently only supports th
 ## Methods and Documentation
 The Phyton implementation offers a library of methods for interaction with the Knowledge Base, with additional methods for other relevant operations. Documentation of the methods offered follows:
 
-* `generate_hash_code`:
+* <strong>generate_hash_code</strong>:
   * Description: Generates a compact, alphanumeric hash code for a given input string.
     The function uses a secure SHA-256 hash algorithm and encodes the result
     in a URL-safe Base64 format. The output is truncated for brevity.
@@ -41,7 +41,7 @@ The Phyton implementation offers a library of methods for interaction with the K
   * Output:
      * `hash_code` (str): A shortened alphanumeric hash code derived from the input data.
       
- * `get_formulas`:
+ * <strong>get_formulas</strong>:
    * Description: This function retrieves and unrolls formulas associated with a given KPI label.
      It recursively searches for nested KPIs in the formulas and expands them until
      all formulas are fully unrolled
@@ -52,5 +52,24 @@ The Phyton implementation offers a library of methods for interaction with the K
       * `f_list` (list): A list of all formulas found during the unrolling process, including nested ones.
       * `kpi_label_list` (list): A list of the original KPI labels (input `kpi` and any nested ones found).
       * `kpi_list` (list): A list of KPI names corresponding to the formulas in `f_list`.
+        
+ * <strong>add_kpi</strong>:
+     * Description: Adds a new KPI (Key Performance Indicator) to the ontology if it meets the specified criteria.
+       The function ensures that the KPI label does not already exist, validates the superclass, and 
+       associates formulas and dependencies with the new KPI.
+     * Input Parameters:
+        * `superclass` (str): The label of the superclass to which this KPI belongs.
+        * `label` (str): The unique label for the new KPI.
+        * `description` (str): A descriptive text explaining the KPI.
+        * `unit_of_measure` (str): The unit in which this KPI is measured.
+        * `parsable_computation_formula` (str): A machine-parsable formula for computing the KPI.
+        * `human_readable_formula` (str, optional): A human-readable formula for computing the KPI. Defaults to `parsable_computation_formula` if not provided.
+        * `depends_on_machine` (bool, optional): Indicates if the KPI depends on the machine. Defaults to False.
+        * `depends_on_operation` (bool, optional): Indicates if the KPI depends on the operation. Defaults to False.
+      * Output:
+        * `None`: Prints error messages or completes the KPI creation process.
+      * Side Effects:
+        * Modifies the ontology to add the new KPI.
+        * Updates global mappings (e.g., HUMAN_READABLE_FORMULA, PARSABLE_FORMULA).
 
 
