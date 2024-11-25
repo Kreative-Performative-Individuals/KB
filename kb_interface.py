@@ -99,9 +99,7 @@ def get_formulas(kpi):
     - onto (Ontology): An ontology object used to search for KPI entities based on their label.
 
     Returns:
-    - f_list (list): A list of all formulas found during the unrolling process, including nested ones.
-    - kpi_label_list (list): A list of the original KPI labels (input `kpi` and any nested ones found).
-    - kpi_list (list): A list of KPI names corresponding to the formulas in `f_list`.
+    - kpi_formula (dict): A dictionary containing all formulas found during the unrolling process, including nested ones.
     """
     
     # Search for the KPI label in the ontology
@@ -119,14 +117,8 @@ def get_formulas(kpi):
     # `to_unroll` will hold formulas to expand, starting with the current KPI's formula
     to_unroll = [PARSABLE_FORMULA[target][0]]
     
-    # `f_list` will store all formulas found and unrolled
-    f_list = [PARSABLE_FORMULA[target][0]]
-    
-    # `kpi_list` will store names of the KPIs as they are found
-    kpi_list = [target.get_name()]
-    
-    # `kpi_label_list` will store the original KPI labels
-    kpi_label_list = [kpi]
+    # `kpi_formula` will store all formulas found and unrolled
+    kpi_formula = {kpi:PARSABLE_FORMULA[target][0]}
     
     # While there are formulas to unroll, continue expanding
     while to_unroll:
@@ -153,12 +145,10 @@ def get_formulas(kpi):
             to_unroll.append(PARSABLE_FORMULA[target][0])
             
             # Append the formula, KPI name, and label to their respective lists
-            f_list.append(PARSABLE_FORMULA[target][0])
-            kpi_list.append(target.get_name())
-            kpi_label_list.append(kpi_name)
-    
+            kpi_formula[kpi_name] = PARSABLE_FORMULA[target][0]
+
     # Return the list of formulas, KPI labels, and KPI names
-    return f_list, kpi_list, kpi_label_list
+    return kpi_formula
 
 # TODO: Greatly improve the intelligence of the method
 def add_kpi(superclass, label, description, unit_of_measure, parsable_computation_formula, 
