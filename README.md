@@ -1,6 +1,6 @@
 # Repository of Topic 1 - KB and KPI Ontology
 
-Version: 1.0.1
+Version: 1.0.3
 
 Last Update: 24/11/2024
 
