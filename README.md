@@ -58,9 +58,7 @@ The Phyton implementation offers a library of methods for interaction with the K
       * `kpi` (str): The label of the KPI whose formula is to be retrieved and unrolled.
       * `onto` (Ontology): An ontology object used to search for KPI entities based on their label.
    * Output:
-      * `f_list` (list): A list of all formulas found during the unrolling process, including nested ones.
-      * `kpi_label_list` (list): A list of the original KPI labels (input `kpi` and any nested ones found).
-      * `kpi_list` (list): A list of KPI names corresponding to the formulas in `f_list`.
+      * `kpi_formula` (dict): A dictionary containing all formulas found during the unrolling process, including nested ones.
         
  * <strong>"add_kpi"</strong>:
      * Description: Adds a new KPI (Key Performance Indicator) to the ontology if it meets the specified criteria.
