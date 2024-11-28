@@ -20,10 +20,11 @@ psutil==6.1.0
 pure_eval==0.2.3
 Pygments==2.18.0
 python-dateutil==2.9.0.post0
-pywin32==308
 pyzmq==26.2.0
 six==1.16.0
 stack-data==0.6.3
 tornado==6.4.2
 traitlets==5.14.3
 wcwidth==0.2.13
+fastapi
+uvicorn
