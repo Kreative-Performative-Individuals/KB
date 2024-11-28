@@ -65,3 +65,7 @@ def add_kpi(kpi: KPIData):
 def get_onto_path():
     path = kbi.get_onto_path()
     return {"ontology_path": str(path)}
+
+@app.get("/health")
+def health_check():
+    return {"status":"ok"}
