@@ -24,10 +24,15 @@ def root():
     return {"message": "knowledge base"}
 
 @app.get("/get_formulas/")
-def get_formulas(kpi_label: str):
+def get_formulas(kpi_label: str = None):
     try:
         result = kbi.get_formulas(kpi_label)
-        return {"formula": result[kpi_label]}
+
+        if kpi_label:
+            return result
+
+        return result
+
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail=str(e))
