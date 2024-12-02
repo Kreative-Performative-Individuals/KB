@@ -61,7 +61,7 @@ The Phyton implementation offers a library of methods for interaction with the K
    * Output:
       * `kpi_formula` (dict): A dictionary containing all formulas found during the unrolling process, including nested ones.
 
- * <strong>"get_closest_kpi_formulas"</strong>:
+ * <strong>"get_closest_kpi_formulas"</strong>: !!! NEW !!!
    * Description: Retrieves the closest Key Performance Indicator (KPI) formulas by comparing the given KPI
     with available formulas or instances, based on the selected similarity method.
     
@@ -75,7 +75,7 @@ The Phyton implementation offers a library of methods for interaction with the K
       * `kpi_formula` (dict): A dictionary containing all formulas found during the unrolling process, including nested ones.
       * `similarity` (float): The similarity score between the KPI and the closest instance (if applicable).
     
- * <strong>"get_instances"</strong>:
+ * <strong>"get_instances"</strong>: !!! NEW !!!
    * Description: Retrieves all instances of an OWL class based on the provided label. 
     The function searches the ontology for a class or instance matching the given label.
     If the target is a class, it collects all instances, including those of its subclasses.
@@ -87,7 +87,7 @@ The Phyton implementation offers a library of methods for interaction with the K
       * `instances` (list): A list of labels for the instances associated with the provided OWL class or instance.
             If no valid instances are found or the input is invalid, an empty list is returned.
 
- * <strong>"get_closest_class_istances"</strong>:
+ * <strong>"get_closest_class_istances"</strong>: !!! NEW !!!
    * Description: Retrieves the closest matching instances for a given OWL class label based on a similarity method.
     This function first tries to find instances based on the exact label. If no matches are found,
     it computes the similarity between the provided label and the labels of all available classes
