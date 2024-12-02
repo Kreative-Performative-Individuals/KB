@@ -4,7 +4,7 @@ import hashlib
 import base64
 import pathlib as pl
 import math
-import configparser
+import os
 
 import Levenshtein
 
@@ -43,7 +43,6 @@ def start():
     global SAVE_INT, ONTO, PARSABLE_FORMULA, HUMAN_READABLE_FORMULA
     global UNIT_OF_MEASURE, DEPENDS_ON, OPERATION_CASS, MACHINE_CASS, KPI_CLASS
 
-    config_dict = _parse_config(CONFIG_PATH)
     # Step 1: Read the configuration file to determine the save interval
     with open(CONFIG_PATH, 'r') as cfg:
         SAVE_INT = int(cfg.read())
@@ -123,31 +122,25 @@ def _get_similarity(a, b, method='w2v'):
         print('METHOD NOT FOUND')
         return 
 
-def _parse_config(file_path):
-    # Crea un oggetto ConfigParser
-    config = configparser.ConfigParser()
-    
-    # Legge il file di configurazione
-    config.read(file_path)
-    
-    # Converte il contenuto del file in un dizionario
-    config_dict = {}
-    for section in config.sections():
-        config_dict[section] = {}
-        for key, value in config.items(section):
-            config_dict[section][key] = value
-    
-    print(config_dict)
-    return config_dict
-
 def _backup():
     global SAVE_INT
+    coarse_grain = 8
+    max_fine_b = 3
+    max_coarse_b = 2
     
     ONTO.save(file=str(MAIN_DIR / (str(SAVE_INT) + '.owl')), format="rdfxml")
+    
+    if (SAVE_INT - max_fine_b)%coarse_grain == 0:
+        if (SAVE_INT - max_fine_b)/coarse_grain - max_coarse_b > 0:
+            os.remove(str(MAIN_DIR / (str(SAVE_INT - max_fine_b - max_coarse_b*coarse_grain) + '.owl')))
+    else:        
+        if SAVE_INT - max_fine_b > 0:
+            os.remove(str(MAIN_DIR / (str(SAVE_INT - max_fine_b) + '.owl')))
+
+    
     SAVE_INT = SAVE_INT + 1
     with open(CONFIG_PATH, 'w+') as cfg:
         cfg.write(str(SAVE_INT))
-        
     
         
         

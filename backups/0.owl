@@ -546,6 +546,31 @@
     
 
 
+    <!-- http://webprotege.stanford.edu/R70UGBnMVa9b53kP8sQgodh -->
+
+    <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/R70UGBnMVa9b53kP8sQgodh">
+        <rdf:type rdf:resource="http://webprotege.stanford.edu/RBajXo0UbJtTDPl0vChmVMI"/>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
+            </owl:Restriction>
+        </rdf:type>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
+            </owl:Restriction>
+        </rdf:type>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°sum°mo[ S°*[S°/[ R°bad_cycles_sum°T°m°o° ; R°cycles_sum°T°m°o° ] ; C°100°]]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI measures the percentage of failed outputs or processes out of the total number of attempts. It reflects the ineffectiveness and unreliability of production processes, machinery and operating practices in achieving desired results without defects, rework or waste.</dc:description>
+        <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">%</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
+        <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">sum_M_O((bad_cycles_sum(T,m,o)/cycles_sum(T,m,o))*100)</webprotege:RCQV99kdEzyvqs86oiS9amD>
+        <rdfs:label xml:lang="en">failure_rate</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
     <!-- http://webprotege.stanford.edu/R721CMEk3DZ2jbtNWsYf6Qf -->
 
     <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/R721CMEk3DZ2jbtNWsYf6Qf">
@@ -622,12 +647,12 @@
                 <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
             </owl:Restriction>
         </rdf:type>
-        <webprotege:RCQ3gGEWKQ4H0NmKL6zx1i rdf:datatype="http://www.w3.org/2001/XMLSchema#string">power_sum</webprotege:RCQ3gGEWKQ4H0NmKL6zx1i>
-        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°sum°mo[ A°sum°t[ D°power_sum°t°m°o° ] ]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
-        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI refers to the total power consumption or total power output over a defined period.</dc:description>
+        <webprotege:RCQ3gGEWKQ4H0NmKL6zx1i rdf:datatype="http://www.w3.org/2001/XMLSchema#string">power_avg</webprotege:RCQ3gGEWKQ4H0NmKL6zx1i>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°mean°mo[ A°sum°t[ D°power_avg°t°m°o° ] ]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI refers to the average power consumption or average power output over a defined period.</dc:description>
         <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">kW</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
         <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pure KPI</webprotege:RCQV99kdEzyvqs86oiS9amD>
-        <rdfs:label xml:lang="en">power_sum</rdfs:label>
+        <rdfs:label xml:lang="en">power_avg</rdfs:label>
     </owl:NamedIndividual>
     
 
@@ -639,6 +664,25 @@
         <webprotege:R9sK43sWlav85V42nRNKVA4 xml:lang="en">floor_3</webprotege:R9sK43sWlav85V42nRNKVA4>
         <webprotege:RCQ3gGEWKQ4H0NmKL6zx1i rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ast-06kbod797nnp</webprotege:RCQ3gGEWKQ4H0NmKL6zx1i>
         <rdfs:label xml:lang="en">testing_machine_3</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://webprotege.stanford.edu/R7gXnnzOu27yHmv7pTWFF2r -->
+
+    <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/R7gXnnzOu27yHmv7pTWFF2r">
+        <rdf:type rdf:resource="http://webprotege.stanford.edu/RCXFzxi9Nt1CVhTN4h3LfNo"/>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
+            </owl:Restriction>
+        </rdf:type>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">S°+[ R°consumption_sum°T°M°idle° ; R°consumption_sum°T°M°working° ]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI quantifies the total amount of energy used within operative process, operation, or time period.</dc:description>
+        <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">kWh</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
+        <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">consumption_sum(T,M,idle) + consumption_sum(T,M,working)</webprotege:RCQV99kdEzyvqs86oiS9amD>
+        <rdfs:label xml:lang="en">operative_consumption</rdfs:label>
     </owl:NamedIndividual>
     
 
@@ -696,11 +740,37 @@
                 <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
             </owl:Restriction>
         </rdf:type>
-        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°sum°mo[ S°*[S°/[ R°good_cycles_sum°T°m°o° ; R°cycles_sum°T°m°o° ]] ; C°100°]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°sum°mo[ S°*[S°/[ R°good_cycles_sum°T°m°o° ; R°cycles_sum°T°m°o° ] ; C°100°]]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
         <dc:description xml:lang="en">This KPI  measures the proportion of successful outputs or processes to total attempts. It reflects the effectiveness and reliability of production processes, machinery, and operational practices in achieving desired outcomes without defects, rework, or waste.</dc:description>
         <webprotege:RCAkMXcvWVU8mUBbfA8m1BH xml:lang="en">%</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
         <webprotege:RCQV99kdEzyvqs86oiS9amD xml:lang="en">sum_M_O((good_cycles_sum(T,m,o)/cycles_sum(T,m,o))*100)</webprotege:RCQV99kdEzyvqs86oiS9amD>
         <rdfs:label xml:lang="en">success_rate</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://webprotege.stanford.edu/R7y2bVsqk7LSC0ogueSlKTA -->
+
+    <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/R7y2bVsqk7LSC0ogueSlKTA">
+        <rdf:type rdf:resource="http://webprotege.stanford.edu/RCXFzxi9Nt1CVhTN4h3LfNo"/>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
+            </owl:Restriction>
+        </rdf:type>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
+            </owl:Restriction>
+        </rdf:type>
+        <webprotege:RCQ3gGEWKQ4H0NmKL6zx1i rdf:datatype="http://www.w3.org/2001/XMLSchema#string">power_max</webprotege:RCQ3gGEWKQ4H0NmKL6zx1i>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°max°mo[ A°max°t[ D°power_max°t°m°o° ] ]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI refers to the maximum power consumption or maximum power output over a defined period.</dc:description>
+        <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">kW</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
+        <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pure KPI</webprotege:RCQV99kdEzyvqs86oiS9amD>
+        <rdfs:label xml:lang="en">power_max</rdfs:label>
     </owl:NamedIndividual>
     
 
@@ -739,6 +809,32 @@
         <webprotege:RCAkMXcvWVU8mUBbfA8m1BH xml:lang="en">#</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
         <webprotege:RCQV99kdEzyvqs86oiS9amD xml:lang="en">Pure KPI</webprotege:RCQV99kdEzyvqs86oiS9amD>
         <rdfs:label xml:lang="en">good_cycles_sum</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://webprotege.stanford.edu/R8PyQpTqTi4cnLownvT5eQn -->
+
+    <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/R8PyQpTqTi4cnLownvT5eQn">
+        <rdf:type rdf:resource="http://webprotege.stanford.edu/RDCe1cjC9xAUtVtFket8lgX"/>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
+            </owl:Restriction>
+        </rdf:type>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
+            </owl:Restriction>
+        </rdf:type>
+        <webprotege:RCQ3gGEWKQ4H0NmKL6zx1i rdf:datatype="http://www.w3.org/2001/XMLSchema#string">cost_avg</webprotege:RCQ3gGEWKQ4H0NmKL6zx1i>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°mean°mo[ A°mean°t[ D°cost_avg°t°m°o° ] ]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI measures the average cost of energy used in production, including electricity, gas, fuel, and other energy sources required to run machinery, heating or cooling systems, and auxiliary operations. It is a financial representation of energy efficiency and a vital metric for cost management and sustainability.</dc:description>
+        <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">€</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
+        <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pure KPI</webprotege:RCQV99kdEzyvqs86oiS9amD>
+        <rdfs:label xml:lang="en">cost_avg</rdfs:label>
     </owl:NamedIndividual>
     
 
@@ -785,7 +881,7 @@
                 <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
             </owl:Restriction>
         </rdf:type>
-        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°sum°mo[ S°*[S°/[ R°consumption_sum°T°m°o° ; R°cycles_sum°T°m°o° ]] ; R°cost_sum°T°m°o°]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°sum°mo[ S°*[S°/[ R°consumption_sum°T°m°o° ; R°cycles_sum°T°m°o° ]; R°cost_sum°T°m°o°]]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
         <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI quantifies the total costs (direct and indirect) associated with a single production cycle.</dc:description>
         <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">€</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
         <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">sum_M_O((good_cycles_sum(T,m,o)/cycles_sum(T,m,o))*100)</webprotege:RCQV99kdEzyvqs86oiS9amD>
@@ -938,6 +1034,51 @@
     
 
 
+    <!-- http://webprotege.stanford.edu/R9EIFK8F4wNcPnOSpdvO7A1 -->
+
+    <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/R9EIFK8F4wNcPnOSpdvO7A1">
+        <rdf:type rdf:resource="http://webprotege.stanford.edu/RDCe1cjC9xAUtVtFket8lgX"/>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
+            </owl:Restriction>
+        </rdf:type>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
+            </owl:Restriction>
+        </rdf:type>
+        <webprotege:RCQ3gGEWKQ4H0NmKL6zx1i rdf:datatype="http://www.w3.org/2001/XMLSchema#string">cost_min</webprotege:RCQ3gGEWKQ4H0NmKL6zx1i>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°min°mo[ A°min°t[ D°cost_min°t°m°o° ] ]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI measures the minimum cost of energy used in production, including electricity, gas, fuel, and other energy sources required to run machinery, heating or cooling systems, and auxiliary operations. It is a financial representation of energy efficiency and a vital metric for cost management and sustainability.</dc:description>
+        <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">€</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
+        <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pure KPI</webprotege:RCQV99kdEzyvqs86oiS9amD>
+        <rdfs:label xml:lang="en">cost_min</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://webprotege.stanford.edu/R9amVr7ORSXiqNgjhaKa7SJ -->
+
+    <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/R9amVr7ORSXiqNgjhaKa7SJ">
+        <rdf:type rdf:resource="http://webprotege.stanford.edu/RCXFzxi9Nt1CVhTN4h3LfNo"/>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
+            </owl:Restriction>
+        </rdf:type>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">S°+[ R°consumption_sum°T°M°idle° ; R°consumption_sum°T°M°offline° ; R°consumption_sum°T°M°working° ]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI quantifies the total amount of energy used within a specific time period.</dc:description>
+        <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">kWh</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
+        <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">consumption_sum(T,M,idle) + consumption_sum(T,M,offline) + consumption_sum(T,M,working)</webprotege:RCQV99kdEzyvqs86oiS9amD>
+        <rdfs:label xml:lang="en">total_consumption</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
     <!-- http://webprotege.stanford.edu/R9eS5blogIAIhBBtxE0m0XV -->
 
     <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/R9eS5blogIAIhBBtxE0m0XV">
@@ -1016,6 +1157,32 @@
     
 
 
+    <!-- http://webprotege.stanford.edu/RBZn42JgZra2TfDU2BHdqdY -->
+
+    <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/RBZn42JgZra2TfDU2BHdqdY">
+        <rdf:type rdf:resource="http://webprotege.stanford.edu/RDCe1cjC9xAUtVtFket8lgX"/>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
+            </owl:Restriction>
+        </rdf:type>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
+            </owl:Restriction>
+        </rdf:type>
+        <webprotege:RCQ3gGEWKQ4H0NmKL6zx1i rdf:datatype="http://www.w3.org/2001/XMLSchema#string">cost_max</webprotege:RCQ3gGEWKQ4H0NmKL6zx1i>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°max°mo[ A°max°t[ D°cost_max°t°m°o° ] ]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI measures the maximum cost of energy used in production, including electricity, gas, fuel, and other energy sources required to run machinery, heating or cooling systems, and auxiliary operations. It is a financial representation of energy efficiency and a vital metric for cost management and sustainability.</dc:description>
+        <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">€</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
+        <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pure KPI</webprotege:RCQV99kdEzyvqs86oiS9amD>
+        <rdfs:label xml:lang="en">cost_max</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
     <!-- http://webprotege.stanford.edu/RBn79uBYDCzU25yKYPAbGLX -->
 
     <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/RBn79uBYDCzU25yKYPAbGLX">
@@ -1038,6 +1205,56 @@
         <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">kWh</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
         <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pure KPI</webprotege:RCQV99kdEzyvqs86oiS9amD>
         <rdfs:label xml:lang="en">consumption_min</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://webprotege.stanford.edu/RBu57tKRMLlGChAlMYhROis -->
+
+    <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/RBu57tKRMLlGChAlMYhROis">
+        <rdf:type rdf:resource="http://webprotege.stanford.edu/RCdAgvbgwoVAfJkY8gwIsFz"/>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
+            </owl:Restriction>
+        </rdf:type>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
+            </owl:Restriction>
+        </rdf:type>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">S°*[ S°/[ A°sum°m[ R°time_sum°T°m°working° ] ; S°+[ A°sum°m[ R°time_sum°T°m°idle° ] ; A°sum°m[ R°time_sum°T°m°offline° ] ] ] ; C°100° ]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Percentage of machine uptime in respect to machine downtime over each machine-operation pairs</dc:description>
+        <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">%</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
+        <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">(sum_M( time_sum(T,m,working)) / ( sum_M(time_sum(T,m,Idle)) + sum_M(time_sum(T,m,offline)) ) )*100</webprotege:RCQV99kdEzyvqs86oiS9amD>
+        <rdfs:label xml:lang="en">availability</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://webprotege.stanford.edu/RBwAZPbF4dDzqX0OjZ3XM9H -->
+
+    <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/RBwAZPbF4dDzqX0OjZ3XM9H">
+        <rdf:type rdf:resource="http://webprotege.stanford.edu/RC1J86KcMvr6WHE8FgSEqIS"/>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
+            </owl:Restriction>
+        </rdf:type>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
+            </owl:Restriction>
+        </rdf:type>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°sum°mo[S°*[ R°total_consumption°T°m°o° ; C°400°]]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI is a sustainability metric that measures the amount of CO2 emissions produced globally for a process, machine, or system. It provides insights into the environmental impact, enabling organizations to track and reduce their carbon emissions.</dc:description>
+        <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">CO2 Emissions</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
+        <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">sum_M_O(total_consumption(T,m,o)*estimated_italian_emission_factor(400))</webprotege:RCQV99kdEzyvqs86oiS9amD>
+        <rdfs:label xml:lang="en">total_carbon_footprint</rdfs:label>
     </owl:NamedIndividual>
     
 
@@ -1126,6 +1343,31 @@
     
 
 
+    <!-- http://webprotege.stanford.edu/RCMtRi0vM7fYuIDA5dGDHjn -->
+
+    <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/RCMtRi0vM7fYuIDA5dGDHjn">
+        <rdf:type rdf:resource="http://webprotege.stanford.edu/RBajXo0UbJtTDPl0vChmVMI"/>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
+            </owl:Restriction>
+        </rdf:type>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
+            </owl:Restriction>
+        </rdf:type>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°mean°m[ S°*[S°/[S°*[  R°good_cycles_sum°T°m°working° ; R°average_cycle_time_avg°T°m°working° ] ; R°time_sum°T°m°working° ]; C°100°]]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI is a comprehensive metric used to evaluate the efficiency and effectiveness of a manufacturing operation. It provides insights into how well equipment is utilized compared to its full potential, factoring in availability, performance, and quality.</dc:description>
+        <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">%</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
+        <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">mean_M(((good_cycles_sum(T,m,working)*average_cycle_time_avg(T,m,working))/time_sum(T,m,working))*100)</webprotege:RCQV99kdEzyvqs86oiS9amD>
+        <rdfs:label xml:lang="en">overall_equipment_effectiveness</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
     <!-- http://webprotege.stanford.edu/RCSOoYmgf7RgNo6pUjNBisD -->
 
     <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/RCSOoYmgf7RgNo6pUjNBisD">
@@ -1208,6 +1450,25 @@
         <webprotege:R9sK43sWlav85V42nRNKVA4 xml:lang="en">floor_1</webprotege:R9sK43sWlav85V42nRNKVA4>
         <webprotege:RCQ3gGEWKQ4H0NmKL6zx1i rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ast-nrd4vl07sffd</webprotege:RCQ3gGEWKQ4H0NmKL6zx1i>
         <rdfs:label xml:lang="en">testing_machine_1</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://webprotege.stanford.edu/RDGKqu6XIxRAF6J9Cak8nhq -->
+
+    <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/RDGKqu6XIxRAF6J9Cak8nhq">
+        <rdf:type rdf:resource="http://webprotege.stanford.edu/RCXFzxi9Nt1CVhTN4h3LfNo"/>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
+            </owl:Restriction>
+        </rdf:type>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°mean°m[S°/[ R°consumption_sum°T°m°working° ; R°cycles_sum°T°m°working° ]]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI measures the effectiveness of a system, device, or process in converting energy input into useful output.</dc:description>
+        <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">kWh/cycle</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
+        <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">mean_M(consumption_sum(T,m,working)/cycles_sum(T,m,working))</webprotege:RCQV99kdEzyvqs86oiS9amD>
+        <rdfs:label xml:lang="en">energy_efficiency</rdfs:label>
     </owl:NamedIndividual>
     
 
@@ -1326,6 +1587,50 @@
     
 
 
+    <!-- http://webprotege.stanford.edu/RM4CqBu84yYzLbfmUMLoUM -->
+
+    <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/RM4CqBu84yYzLbfmUMLoUM">
+        <rdf:type rdf:resource="http://webprotege.stanford.edu/RDCe1cjC9xAUtVtFket8lgX"/>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
+            </owl:Restriction>
+        </rdf:type>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°sum°mo[ S°*[R°total_consumption°T°m°o°; R°cost_sum°T°m°o°]]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI is a financial metric that quantifies the total expenditure on energy consumption over a specific period or for a specific process, operation, or system. It is a vital KPI for budgeting, cost analysis, and identifying opportunities for cost-saving measures.</dc:description>
+        <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">€</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
+        <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">sum_M_O(total_consumption(T,m,o)*cost_sum(T,m,o))</webprotege:RCQV99kdEzyvqs86oiS9amD>
+        <rdfs:label xml:lang="en">total_energy_cost</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://webprotege.stanford.edu/RNnLk3LvmfGwkHpCdGjDOl -->
+
+    <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/RNnLk3LvmfGwkHpCdGjDOl">
+        <rdf:type rdf:resource="http://webprotege.stanford.edu/RpyMXvwTMVl8cReeriZFjv"/>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
+            </owl:Restriction>
+        </rdf:type>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
+            </owl:Restriction>
+        </rdf:type>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°mean°mo[S°/[ R°bad_cycles_sum°T°m°o° ; R°time_sum°T°m°o° ]]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Mean time between failures averaged over machine-opertion pairs</dc:description>
+        <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">s</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
+        <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">mean_M_O(bad_cycles_sum(T,m,o)/time_sum(T,m,o))</webprotege:RCQV99kdEzyvqs86oiS9amD>
+        <rdfs:label xml:lang="en">mean_time_between_failures</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
     <!-- http://webprotege.stanford.edu/RPkEXCqfhuFl0sp3bS7RuX -->
 
     <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/RPkEXCqfhuFl0sp3bS7RuX">
@@ -1348,6 +1653,31 @@
         <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">#</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
         <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pure KPI</webprotege:RCQV99kdEzyvqs86oiS9amD>
         <rdfs:label xml:lang="en">good_cycles_min</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://webprotege.stanford.edu/RT3uT0LKeXwYiqlE8UAOXE -->
+
+    <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/RT3uT0LKeXwYiqlE8UAOXE">
+        <rdf:type rdf:resource="http://webprotege.stanford.edu/RC1J86KcMvr6WHE8FgSEqIS"/>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
+            </owl:Restriction>
+        </rdf:type>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
+            </owl:Restriction>
+        </rdf:type>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°mean°mo[S°/[ R°total_carbon_footprint°T°m°o° ; R°cycles_sum°T°m°o°]]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI is a sustainability metric that measures the amount of CO2 emissions produced for each operational cycle of a process, machine, or system. It provides insights into the environmental impact of individual production or operational cycles, enabling organizations to track and reduce their carbon emissions.</dc:description>
+        <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">CO2 Emissions/units</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
+        <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">mean_M_O(total_carbon_footprint(T,m,o)/cycles_sum(T,m,o))</webprotege:RCQV99kdEzyvqs86oiS9amD>
+        <rdfs:label xml:lang="en">carbon_footprint_per_cycle</rdfs:label>
     </owl:NamedIndividual>
     
 
@@ -1392,6 +1722,57 @@
         <webprotege:R9sK43sWlav85V42nRNKVA4 xml:lang="en">floor_2</webprotege:R9sK43sWlav85V42nRNKVA4>
         <webprotege:RCQ3gGEWKQ4H0NmKL6zx1i rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ast-upqd50xg79ir</webprotege:RCQ3gGEWKQ4H0NmKL6zx1i>
         <rdfs:label xml:lang="en">assembly_machine_2</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://webprotege.stanford.edu/RuyPO2xYhkJ3hdbsZ0wgNo -->
+
+    <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/RuyPO2xYhkJ3hdbsZ0wgNo">
+        <rdf:type rdf:resource="http://webprotege.stanford.edu/RCXFzxi9Nt1CVhTN4h3LfNo"/>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
+            </owl:Restriction>
+        </rdf:type>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
+            </owl:Restriction>
+        </rdf:type>
+        <webprotege:RCQ3gGEWKQ4H0NmKL6zx1i rdf:datatype="http://www.w3.org/2001/XMLSchema#string">power_min</webprotege:RCQ3gGEWKQ4H0NmKL6zx1i>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°min°mo[ A°min°t[ D°power_min°t°m°o° ] ]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI refers to the minimum power consumption or minimum power output over a defined period.</dc:description>
+        <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">kW</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
+        <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pure KPI</webprotege:RCQV99kdEzyvqs86oiS9amD>
+        <rdfs:label xml:lang="en">power_min</rdfs:label>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://webprotege.stanford.edu/RyOWkHNBQCxXcHHsvDAU24 -->
+
+    <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/RyOWkHNBQCxXcHHsvDAU24">
+        <rdf:type rdf:resource="http://webprotege.stanford.edu/RCdAgvbgwoVAfJkY8gwIsFz"/>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
+            </owl:Restriction>
+        </rdf:type>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P"/>
+                <owl:someValuesFrom rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
+            </owl:Restriction>
+        </rdf:type>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">S°*[ S°/[ A°sum°m[ R°time_sum°T°m°working° ] ; S°+[ A°sum°m[ R°time_sum°T°m°idle° ] ; A°sum°m[ R°time_sum°T°m°offline° ] ; A°sum°m[ R°time_sum°T°m°working° ] ] ] ; C°100° ]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI measures the efficiency of time spent on productive work in comparison to the total available time.</dc:description>
+        <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">%</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
+        <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">(sum_M( time_sum(T,m,working)) / ( sum_M(time_sum(T,m,Idle)) + sum_M(time_sum(T,m,offline)) + sum_M(time_sum(T,m,working))) )*100</webprotege:RCQV99kdEzyvqs86oiS9amD>
+        <rdfs:label xml:lang="en">utilization_rate</rdfs:label>
     </owl:NamedIndividual>
 </rdf:RDF>
 
