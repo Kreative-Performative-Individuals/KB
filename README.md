@@ -17,17 +17,19 @@ Please note that the current Knowledge Base prototype currently only supports th
 
 * <strong>Pure KPIs</strong>:
   * Machine Usage KPIs -> Utilization KPIs -> `time_sum`, `time_avg`, `time_min`, `time_max`
-  * Energy KPIs -> Consumption KPIs -> `consumption_sum`, `consumption_avg`, `consumption_min`, `consumption_max`, `power_sum`
+  * Energy KPIs -> Consumption KPIs -> `consumption_sum`, `consumption_avg`, `consumption_min`, `consumption_max`, `power_avg`, `power_min`, `power_max`
   * Production KPIs -> Cycles KPIs -> `cycles_sum`, `cycles_avg`, `cycles_min`, `cycles_max`, `average_cycle_time_avg`
   * Production KPIs -> Efficiency KPIs -> `good_cycles_sum`, `good_cycles_avg`, `good_cycles_min`, `good_cycles_max`, `bad_cycles_sum`, `bad_cycles_avg`, `bad_cycles_min`, `bad_cycles_max`
-  * Financial KPIs -> Cost KPIs -> `cost_sum`
+  * Financial KPIs -> Cost KPIs -> `cost_sum`, `cost_avg`, `cost_min`, `cost_max`
 
  
 * <strong>Derived KPIs</strong>:
-  * Machine Usage KPIs -> Downtime KPIs -> `non_operative_time`
-  * Energy KPIs -> Consumption KPIs -> `power_cumulative`, `power_mean`
-  * Production KPIs -> Efficiency KPIs -> `success_rate`
-  * Financial KPIs -> Cost KPIs -> `cost_per_cycle`
+  * Machine Usage KPIs -> Utilization KPIs -> `utilization_rate`, `availability`
+  * Machine Usage KPIs -> Downtime KPIs -> `non_operative_time`, `mean_time_between_failures`
+  * Energy KPIs -> Consumption KPIs -> `power_cumulative`, `power_mean`, `energy_efficiency`, `total_consumption`, `operative_consumption`
+  * Energy KPIs -> Sustainability KPIs -> `total_carbon_footprint`, `carbon_footprint_per_cycle`
+  * Production KPIs -> Efficiency KPIs -> `success_rate`, `failure_rate`, `overall_equipment_effectiveness`
+  * Financial KPIs -> Cost KPIs -> `cost_per_cycle`, `total_energy_cost` 
 
 ## Methods and Documentation
 The Phyton implementation offers a library of methods for interaction with the Knowledge Base, with additional methods for other relevant operations. Documentation of the methods offered follows:
