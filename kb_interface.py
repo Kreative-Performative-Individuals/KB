@@ -4,7 +4,7 @@ import hashlib
 import base64
 import pathlib as pl
 import math
-import os
+import configparser
 
 import Levenshtein
 
@@ -43,6 +43,7 @@ def start():
     global SAVE_INT, ONTO, PARSABLE_FORMULA, HUMAN_READABLE_FORMULA
     global UNIT_OF_MEASURE, DEPENDS_ON, OPERATION_CASS, MACHINE_CASS, KPI_CLASS
 
+    config_dict = _parse_config(CONFIG_PATH)
     # Step 1: Read the configuration file to determine the save interval
     with open(CONFIG_PATH, 'r') as cfg:
         SAVE_INT = int(cfg.read())
@@ -121,6 +122,34 @@ def _get_similarity(a, b, method='w2v'):
     else:
         print('METHOD NOT FOUND')
         return 
+
+def _parse_config(file_path):
+    # Crea un oggetto ConfigParser
+    config = configparser.ConfigParser()
+    
+    # Legge il file di configurazione
+    config.read(file_path)
+    
+    # Converte il contenuto del file in un dizionario
+    config_dict = {}
+    for section in config.sections():
+        config_dict[section] = {}
+        for key, value in config.items(section):
+            config_dict[section][key] = value
+    
+    print(config_dict)
+    return config_dict
+
+def _backup():
+    global SAVE_INT
+    
+    ONTO.save(file=str(MAIN_DIR / (str(SAVE_INT) + '.owl')), format="rdfxml")
+    SAVE_INT = SAVE_INT + 1
+    with open(CONFIG_PATH, 'w+') as cfg:
+        cfg.write(str(SAVE_INT))
+        
+    
+        
         
 def get_formulas(kpi):
     """
@@ -184,7 +213,6 @@ def get_formulas(kpi):
     # Return the list of formulas, KPI labels, and KPI names
     return kpi_formula
 
-
 def get_closest_kpi_formulas(kpi, method='levenshtein'):
     """
     Retrieves the closest Key Performance Indicator (KPI) formulas by comparing the given KPI
@@ -228,6 +256,7 @@ def get_closest_kpi_formulas(kpi, method='levenshtein'):
     else:
         # If formulas are found, return them with a perfect similarity score (1)
         return ret, 1
+
 
 def add_kpi(superclass, label, description, unit_of_measure, parsable_computation_formula, 
             human_readable_formula=None, 
@@ -301,12 +330,7 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
         elif depends_on_machine:
             DEPENDS_ON[new_el] = [MACHINE_CASS]    # Associate with machine if applicable
             
-        
-        global SAVE_INT
-        ONTO.save(file=str(MAIN_DIR / (str(SAVE_INT) + '.owl')), format="rdfxml")
-        SAVE_INT = SAVE_INT + 1
-        with open(CONFIG_PATH, 'w+') as cfg:
-            cfg.write(str(SAVE_INT))
+        _backup()
 
 def get_onto_path():
     """
@@ -316,6 +340,7 @@ def get_onto_path():
     - pathlib.Path: The full file path to the ontology file, as a `Path` object.
     """
     return MAIN_DIR / (str(SAVE_INT - 1) + '.owl')
+
 
 def get_instances(owl_class_label):
     """
@@ -374,7 +399,6 @@ def get_instances(owl_class_label):
     
     # Step 3: Return the instances as a list (to make it more user-friendly)
     return list(instances)
-
 
 def get_closest_class_instances(owl_class_label, method='levenshtein'):
     """
