@@ -3,6 +3,7 @@ import string
 import os
 import sys
 import time
+import pathlib
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import kb_interface as kbi
@@ -60,8 +61,8 @@ for lab in kbi.ONTO.search(label='kpi')[0].instances():
 print('Testing get_closest_class_instances correct label')
 print('----------------------------------------------------------------------------')
 for cl in kbi.ONTO.classes():
-    
-    ret = kbi.get_closest_kpi_formulas(cl.label.en.first())
+    print(cl.label)
+    ret = kbi.get_closest_class_instances(cl.label.en.first())
     print('Requested:', cl.label.en.first())
     print('Received:', ret)
     print('----------------------------------------------------------------------------')
@@ -70,7 +71,7 @@ print('Testing get_closest_class_instances wrong label ({modify_count} modify)')
 print('----------------------------------------------------------------------------')
 for cl in kbi.ONTO.classes():
     
-    ret = kbi.get_closest_kpi_formulas(random_modify(cl.label.en.first(), modify_count))
+    ret = kbi.get_closest_class_instances(random_modify(cl.label.en.first(), modify_count))
     print('Requested:', cl.label.en.first())
     print('Received:', ret)
     print('----------------------------------------------------------------------------')
@@ -101,9 +102,18 @@ for i in range(200):
     kbi.add_kpi(*['downtime_kpi', str(i), 'desc','unit', 'form'])
 
 time.sleep(2)
-print('Deleting generated files')
-for f in os.listdir('../backups'): 
-    if f != '0.owl' and os.path.isfile(os.path.join('../backups', f)): 
-        os.remove(os.path.join('../backups', f)) 
-with open('../config.cfg', 'w+') as cfg:
-        cfg.write(str(1))
+        
+# Definisci il percorso della cartella
+folder = pathlib.Path('backups')
+
+# Verifica che la cartella esista
+if folder.exists() and folder.is_dir():
+    # Elimina tutti i file nella cartella, eccetto 0.owl
+    for file in folder.iterdir():
+        if file.is_file() and file.name != '0.owl':
+            file.unlink()  # Rimuove il file
+            
+with open('config.cfg', 'w+') as cfg:
+    cfg.write(str(1)) 
+        
+print('Test ended')
