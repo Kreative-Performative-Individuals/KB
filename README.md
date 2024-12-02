@@ -62,25 +62,23 @@ The Phyton implementation offers a library of methods for interaction with the K
       * `kpi_formula` (dict): A dictionary containing all formulas found during the unrolling process, including nested ones.
 
  * <strong>"get_closest_kpi_formulas"</strong>: !!! NEW !!!
-   * Description: Retrieves the closest Key Performance Indicator (KPI) formulas by comparing the given KPI
-    with available formulas or instances, based on the selected similarity method.
-    
-    The function first attempts to retrieve existing formulas for the given KPI. If no formulas are found,
-    it calculates the similarity between the KPI and other instances, and returns the formulas 
-    associated with the closest instance.
+   * Description: Finds the formulas associated with a KPI or the closest matching KPI.
+
+    If no formula is found for the given KPI, this function calculates similarity scores between 
+    the KPI and other ontology entities, returning formulas for the closest match.
    * Input Parameters: 
       * `kpi` (str): The label of the KPI whose formula is to be retrieved and unrolled.
       * `method` (str, optional): The similarity method to use for comparison. Defaults to 'levenshtein'.
    * Output:
-      * `kpi_formula` (dict): A dictionary containing all formulas found during the unrolling process, including nested ones.
-      * `similarity` (float): The similarity score between the KPI and the closest instance (if applicable).
+      * A tuple containing:
+        - dict: A dictionary containing all formulas found during the unrolling process, including nested ones.
+        - float: The similarity score (1 for exact matches).
     
  * <strong>"get_instances"</strong>: !!! NEW !!!
-   * Description: Retrieves all instances of an OWL class based on the provided label. 
-    The function searches the ontology for a class or instance matching the given label.
-    If the target is a class, it collects all instances, including those of its subclasses.
-    If the target is an individual instance, the function returns the label of that instance.
-    If no match or multiple matches are found, an error message is printed, and the function exits.
+   * Description: Retrieves all instances of a given OWL class or individual.
+
+    If the input label corresponds to a class, instances of the class and its subclasses are returned.
+    If the label corresponds to an individual, it is directly returned.
    * Input Parameters: 
       * `owl_class_label` (str): The label of the OWL class or instance to search for.
    * Output:
@@ -88,17 +86,16 @@ The Phyton implementation offers a library of methods for interaction with the K
             If no valid instances are found or the input is invalid, an empty list is returned.
 
  * <strong>"get_closest_class_istances"</strong>: !!! NEW !!!
-   * Description: Retrieves the closest matching instances for a given OWL class label based on a similarity method.
-    This function first tries to find instances based on the exact label. If no matches are found,
-    it computes the similarity between the provided label and the labels of all available classes
-    and individuals in the ontology, selecting the one with the highest similarity.
+   * Description: Finds instances of the closest matching class or individual based on label similarity.
+
+    If no exact match is found, computes similarity with all ontology entities to locate the best match.
    * Input Parameters: 
       * `owl_class_label` (str): The label of the OWL class or instance to search for.
       * `method` (str, optional): The similarity method to use for comparison. Defaults to 'levenshtein'.
    * Output:
       * A tuple containing:
-        - `max_label` A label for the instance closest to the provided OWL class or instance.
-        - `max_val` The similarity score of the closest match (1 if an exact match is found).
+        - list: Instances of the closest matching class or individual.
+        - float: The similarity score of the closest match.
         
  * <strong>"add_kpi"</strong>:
      * Description: Adds a new KPI (Key Performance Indicator) to the ontology if it meets the specified criteria.
