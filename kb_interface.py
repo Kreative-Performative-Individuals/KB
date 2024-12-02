@@ -3,6 +3,10 @@ import re
 import hashlib
 import base64
 import pathlib as pl
+import math
+import os
+
+import Levenshtein
 
 MAIN_DIR = pl.Path('./backups')
 ONTO_PATH = ['KB_original']
@@ -17,7 +21,6 @@ DEPENDS_ON = None
 OPERATION_CASS = None
 MACHINE_CASS = None
 KPI_CLASS = None
-
 
 def start():
     """
@@ -58,6 +61,9 @@ def start():
     MACHINE_CASS = ONTO.search(label='machine')[0]
     KPI_CLASS = ONTO.search(label='kpi')[0]
 
+    import os
+    os.environ["KAGGLE_CONFIG_DIR"] = "./backups"
+
     # Confirm successful initialization
     print("Ontology successfully initialized!")
 
@@ -88,6 +94,34 @@ def _generate_hash_code(input_data):
     
     return hash_code
 
+def _get_similarity(a, b, method='w2v'):
+    """
+    Calculates the similarity between two strings using the specified method.
+    The function can use either Word2Vec (w2v) or Levenshtein distance to compute the similarity.
+
+    Parameters:
+    - a (str): The first string to compare.
+    - b (str): The second string to compare.
+    - method (str, optional): The method used to compute similarity. Can be 'levenshtein' for Levenshtein distance.
+
+    Returns:
+    - similarity (float): A similarity score between 0 and 1. A score of 1 indicates identical strings.
+    """
+    
+    # Check if the method chosen is 'levenshtein' for Levenshtein distance
+    if method == 'levenshtein':
+        # Compute the Levenshtein distance between the two strings
+        distance = Levenshtein.distance(a, b)
+        
+        # Calculate the similarity as 1 - (distance / max length of the two strings)
+        # This converts the distance into a similarity score between 0 and 1
+        similarity = 1 - distance / max(len(a), len(b))
+        
+        return similarity
+    else:
+        print('METHOD NOT FOUND')
+        return 
+        
 def get_formulas(kpi):
     """
     This function retrieves and unrolls formulas associated with a given KPI label.
@@ -150,7 +184,51 @@ def get_formulas(kpi):
     # Return the list of formulas, KPI labels, and KPI names
     return kpi_formula
 
-# TODO: Greatly improve the intelligence of the method
+
+def get_closest_kpi_formulas(kpi, method='levenshtein'):
+    """
+    Retrieves the closest Key Performance Indicator (KPI) formulas by comparing the given KPI
+    with available formulas or instances, based on the selected similarity method.
+    
+    The function first attempts to retrieve existing formulas for the given KPI. If no formulas are found,
+    it calculates the similarity between the KPI and other instances, and returns the formulas 
+    associated with the closest instance.
+
+    Parameters:
+    - kpi (str): The Key Performance Indicator (KPI) whose formulas are to be found.
+    - method (str, optional): The similarity method to use for comparison. Defaults to 'levenshtein'.
+    
+    Returns:
+    - formulas (list): The list of formulas associated with the closest KPI, or formulas related to the given KPI.
+    - similarity (float): The similarity score between the KPI and the closest instance (if applicable).
+    """
+    
+    # Attempt to retrieve formulas associated with the given KPI
+    ret = get_formulas(kpi)
+    
+    # If no formulas are found for the given KPI, compute the similarity with other instances
+    if not ret:
+        # Initialize variables to track the maximum similarity value and corresponding label
+        max_val = -math.inf
+        max_label = ''
+        
+        # Iterate through all available instances to find the closest match based on similarity
+        for ind in ONTO.individuals():
+            # Compute the similarity between the given KPI and the instance's label
+            similarity = _get_similarity(kpi, ind.label.en.first(), method)
+            
+            # Update the maximum similarity and label if a closer match is found
+            if max_val < similarity:
+                max_val = similarity
+                max_label = ind.label.en.first()
+        
+        # Return the formulas associated with the closest label, along with the similarity value
+        return get_formulas(max_label), max_val
+    
+    else:
+        # If formulas are found, return them with a perfect similarity score (1)
+        return ret, 1
+
 def add_kpi(superclass, label, description, unit_of_measure, parsable_computation_formula, 
             human_readable_formula=None, 
             depends_on_machine=False, 
@@ -173,10 +251,6 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
 
     Returns:
     - None: Prints error messages or completes the KPI creation process.
-
-    Side Effects:
-    - Modifies the ontology to add the new KPI.
-    - Updates global mappings (e.g., HUMAN_READABLE_FORMULA, PARSABLE_FORMULA).
     """
     
     # Default the human-readable formula to the parsable computation formula if not provided
@@ -242,3 +316,114 @@ def get_onto_path():
     - pathlib.Path: The full file path to the ontology file, as a `Path` object.
     """
     return MAIN_DIR / (str(SAVE_INT - 1) + '.owl')
+
+def get_instances(owl_class_label):
+    """
+    Retrieves all instances of an OWL class based on the provided label. 
+    The function searches the ontology for a class or instance matching the given label.
+    If the target is a class, it collects all instances, including those of its subclasses.
+    If the target is an individual instance, the function returns the label of that instance.
+    If no match or multiple matches are found, an error message is printed, and the function exits.
+
+    Parameters:
+    - owl_class_label (str): The label of the OWL class or instance to search for.
+
+    Returns:
+    - list: A list of labels for the instances associated with the provided OWL class or instance.
+            If no valid instances are found or the input is invalid, an empty list is returned.
+    """
+    
+    # Step 1: Search for the OWL class or instance based on the provided label
+    target = ONTO.search(label=owl_class_label)
+    
+    if not target or len(target) > 1:
+        # If no match or multiple matches are found, print an error and terminate
+        print("DOUBLE OR NONE REFERENCED KPI")
+        return
+    
+    # Use the first match as the valid target
+    target = target[0]
+
+    print(target)
+    
+    # Initialize a set to store instances (avoids duplicates)
+    instances = set()
+    
+    # Step 2: Check if the target is a class (ThingClass) or an individual instance (Thing)
+    if isinstance(target, or2.ThingClass):
+        # If the target is a class, process the class and its subclasses
+        classes_to_process = [target]
+
+        while classes_to_process:
+            current_class = classes_to_process.pop()
+            
+            # Add all instances of the current class to the set
+            for i in current_class.instances():
+                instances.add(i.label.en.first())
+                
+            # Add all subclasses of the current class to the list of classes to process
+            classes_to_process.extend(current_class.subclasses())
+            
+    elif isinstance(target, or2.Thing):
+        # If the target is an individual instance, add it directly to the set
+        instances.add(owl_class_label)
+        
+    else:
+        # If the target is neither a class nor an instance, print an error message
+        print("INPUT IS NEITHER A CLASS NOR A INSTANCE")
+    
+    # Step 3: Return the instances as a list (to make it more user-friendly)
+    return list(instances)
+
+
+def get_closest_class_instances(owl_class_label, method='levenshtein'):
+    """
+    Retrieves the closest matching instances for a given OWL class label based on a similarity method.
+    This function first tries to find instances based on the exact label. If no matches are found,
+    it computes the similarity between the provided label and the labels of all available classes
+    and individuals in the ontology, selecting the one with the highest similarity.
+
+    Parameters:
+    - owl_class_label (str): The label of the OWL class or instance to search for.
+    - method (str): The method used to calculate similarity between labels. Default is 'levenshtein'.
+
+    Returns:
+    - tuple: A tuple containing:
+        - A list of labels for the instances closest to the provided OWL class or instance.
+        - The similarity score of the closest match (1 if an exact match is found).
+    """
+
+    # Step 1: Try to get the instances of the provided OWL class label
+    ret = get_instances(owl_class_label)
+    
+    if not ret:
+        # Step 2: If no exact match is found, we need to calculate the similarity between the provided label and
+        # the labels of all available classes and individuals in the ontology.
+        
+        max_val = -math.inf  # Initialize the maximum similarity score to negative infinity.
+        max_label = ''  # Initialize an empty string to store the label of the closest match.
+        
+        # Step 3: Compare the input label with all the class labels in the ontology.
+        for ind in ONTO.classes():
+            similarity = _get_similarity(owl_class_label, ind.label.en.first(), method)  # Compute similarity.
+            
+            # If the current similarity is higher than the previous max, update max_val and max_label.
+            if max_val < similarity:
+                max_val = similarity
+                max_label = ind.label.en.first()
+        
+        # Step 4: If no match was found in the classes, check among individuals.
+        for ind in ONTO.individuals():
+            similarity = _get_similarity(owl_class_label, ind.label.en.first(), method)  # Compute similarity.
+            
+            # If the current similarity is higher than the previous max, update max_val and max_label.
+            if max_val < similarity:
+                max_val = similarity
+                max_label = ind.label.en.first()
+
+        # Step 5: Print and return the closest match's instances and similarity score.
+        return get_instances(max_label), max_val
+    
+    else:
+        # Step 6: If exact instances were found in the first step, return them along with a similarity score of 1 (exact match).
+        return ret, 1
