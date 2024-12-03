@@ -65,7 +65,7 @@ def get_onto_path():
     path = kbi.get_onto_path()
     return {"ontology_path": str(path)}
 
-@app.get("/api/kpi-formulas")
+@app.get("/kpi-formulas")
 async def get_kpi_formulas(
     kpi: str = Query(..., description="The label of the KPI to retrieve formulas for"),
     method: Optional[str] = Query("levenshtein", description="The similarity method to use")
@@ -90,7 +90,7 @@ async def get_kpi_formulas(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/api/class-instances")
+@app.get("/class-instances")
 async def get_class_instances(
     owl_class_label: str = Query(..., description="The label of the OWL class or instance to search for"),
     method: Optional[str] = Query("levenshtein", description="The similarity method to use for comparison")
