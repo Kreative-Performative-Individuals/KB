@@ -115,6 +115,26 @@ async def get_class_instances(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/object-properties")
+async def get_object_properties(
+    label: str = Query(..., description="The label of the ontology object to query."),
+    method: str = Query("levenshtein", description="The similarity method to use (e.g., 'levenshtein').")
+):
+    """
+    Endpoint to retrieve properties of an ontology object by label.
+    Args:
+        label (str): The label of the ontology object.
+        method (str): The similarity method to use (default: 'levenshtein').
+    Returns:
+        dict: The properties and similarity of the closest match.
+    """
+    try:
+        properties, similarity = kbi.get_closest_object_properties(label, method)
+        if not properties:
+            raise HTTPException(status_code=404, detail="Object not found")
+        return {"properties": properties, "similarity": similarity}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/health")
 def health_check():
