@@ -157,8 +157,25 @@ def _backup():
     with open(CONFIG_PATH, 'w+') as cfg:
         cfg.write(str(SAVE_INT))
     
-        
-        
+def _extract_label(lab):
+    if isinstance(lab, list):
+        return str(lab.first())
+    else:
+        return str(lab)
+    
+def _fix():
+    for el in get_instances('kpi'):
+        target = ONTO.search(label=el)[0]
+        if el in ['energy_efficiency', 'non_operative_time', 'operative_consumption', 'total_consumption', 'total_energy_cost']:
+            DEPENDS_ON[target] = [OPERATION_CASS]
+        else:
+            DEPENDS_ON[target] = [MACHINE_CASS, OPERATION_CASS]
+
+    ONTO.save(file='./new_onto_test.owl', format="rdfxml")
+
+
+ 
+ 
 def get_formulas(kpi):
     """
     Retrieves and expands formulas associated with a given KPI.
@@ -309,19 +326,6 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
 
 
 
-def get_onto_path():
-    """
-    Returns the file path to the latest ontology backup.
-
-    Constructs the path based on the current backup index.
-
-    Returns:
-    - pathlib.Path: The file path to the most recent ontology backup.
-    """
-    return MAIN_DIR / (str(SAVE_INT - 1) + '.owl')
-
-
-
 def get_instances(owl_class_label):
     """
     Retrieves all instances of a given OWL class or individual.
@@ -370,9 +374,8 @@ def get_instances(owl_class_label):
 
 def get_closest_class_instances(owl_class_label, method='levenshtein'):
     """
-    Finds instances of the closest matching class or individual based on label similarity.
-
-    If no exact match is found, computes similarity with all ontology entities to locate the best match.
+    Retrieves all instances of a given OWL class or individual, if not exact match is found search for the
+    most similar element in the KB.
 
     Parameters:
     - owl_class_label (str): The label of the class or individual to search for.
@@ -414,3 +417,147 @@ def get_closest_class_instances(owl_class_label, method='levenshtein'):
     else:
         # If exact match is found, return the instances with similarity score of 1.
         return ret, 1
+
+
+
+def get_object_properties(owl_label):
+    """
+    Retrieves all the properties (annotation, object, and data properties) associated with an ontology entity
+    based on its label. It also gathers information about superclasses, subclasses, and instances if the element
+    is a class or individual.
+
+    Args:
+        owl_label (str): The label of the ontology element (class or individual) whose properties are to be retrieved.
+
+    Returns:
+        dict: A dictionary containing the properties associated with the element, including:
+            - 'label': The label of the element.
+            - 'description': The description annotation property, if available.
+            - 'depends_on_other_kpi': A list of KPI names the element depends on (for a specific property).
+            - 'superclasses': List of superclasses of the element (for classes and individuals).
+            - 'subclasses': List of subclasses of the element (for classes).
+            - 'instances': List of instances of the element (for classes).
+    """
+    # Search for the target element using its label in the ontology.
+    target = ONTO.search(label=owl_label)
+    
+    if not target or len(target) > 1:
+        print("DOUBLE OR NONE REFERENCED KPI")
+        return
+    
+    target = target[0]  # Extract the single matching element.
+    
+    properties = {'label': _extract_label(target.label)}  # Initialize properties dictionary with the label.
+    
+    # Iterate over annotation properties to gather description and other annotations.
+    for prop in ONTO.annotation_properties():
+        references = prop[target]
+        if references:
+            if prop._name == 'description':
+                properties['description'] = _extract_label(prop[target])  # Handle description property
+            else:
+                properties[_extract_label(prop.label)] = _extract_label(prop[target])  # Handle other annotations
+    
+    # Iterate over object properties to gather object property values.
+    for prop in ONTO.object_properties():
+        references = prop[target]
+        if references:
+            properties[_extract_label(prop.label)] = [_extract_label(x.label) for x in references]  # List of related objects
+    
+    # Iterate over data properties to gather data property values.
+    for prop in ONTO.data_properties():
+        references = prop[target]
+        if references:
+            properties[_extract_label(prop.label)] = _extract_label(references)  # Single data property value
+            
+            # Special handling for PARSABLE_FORMULA, extracting dependencies.
+            if prop == PARSABLE_FORMULA:
+                depends_on_kpi = []
+                matches = re.findall(r'R°[A-Za-z_]+°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', references[0])  
+                for match in matches:
+                    kpi_name = re.match(r'R°([A-Za-z_]+)°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', match).group(1)
+                    depends_on_kpi.append(kpi_name)
+                properties['depends_on_other_kpi'] = depends_on_kpi
+
+    # Check if the target is a class (ThingClass) and retrieve its superclass and subclass information.
+    if isinstance(target, or2.ThingClass):
+        properties['superclasses'] = [_extract_label(superclass.label) for superclass in target.is_a if 
+                                      isinstance(superclass, or2.ThingClass) and 
+                                      _extract_label(superclass.label) != 'None']
+        properties['subclasses'] = [_extract_label(subclass.label) for subclass in target.subclasses()]
+        properties['instances'] = get_instances(_extract_label(target.label))
+        properties['entity_type'] = 'class'
+        
+    # Check if the target is an individual (Thing) and retrieve its superclass information.
+    elif isinstance(target, or2.Thing):
+        properties['superclasses'] = [_extract_label(superclass.label) for superclass in target.is_a if 
+                                      isinstance(superclass, or2.ThingClass) and 
+                                      _extract_label(superclass.label) != 'None']
+        properties['entity_type'] = 'instance'
+    else:
+        properties['entity_type'] = 'property'
+
+    return properties
+    
+def get_closest_object_properties(owl_label, method='levenshtein'):
+    """
+    Retrieves the properties of the ontology element that is the closest match to the given label (`owl_label`).
+    The closeness is determined by a similarity measure (default is Levenshtein distance), and the function
+    returns the properties of the most similar element found.
+
+    Args:
+        owl_label (str): The label of the ontology element whose closest match is to be found.
+        method (str): The similarity measure to use for finding the closest match (default: 'levenshtein').
+
+    Returns:
+        tuple: A tuple containing:
+            - dict: The properties of the closest matching element.
+            - float: The similarity score (between 0 and 1) of the closest match.
+    """
+    # Attempt to retrieve properties for the exact match of the owl_label.
+    ret = get_object_properties(owl_label)
+    
+    if not ret:
+        max_val = -math.inf  # Initialize a variable to track the maximum similarity score.
+        max_label = ''  # Initialize a variable to store the label of the closest match.
+
+        # Check similarity with all classes in the ontology.
+        for ind in ONTO.classes():
+            similarity = _get_similarity(owl_label, ind.label.en.first(), method)
+            if max_val < similarity:
+                max_val = similarity
+                max_label = ind.label.en.first()
+
+        # Check similarity with all individuals in the ontology.
+        for ind in ONTO.individuals():
+            similarity = _get_similarity(owl_label, ind.label.en.first(), method)
+            if max_val < similarity:
+                max_val = similarity
+                max_label = ind.label.en.first()
+
+        # Check similarity with all object properties in the ontology.
+        for ind in ONTO.object_properties():
+            similarity = _get_similarity(owl_label, _extract_label(ind.label), method)
+            if max_val < similarity:
+                max_val = similarity
+                max_label = ind.label.en.first()
+
+        # Check similarity with all data properties in the ontology.
+        for ind in ONTO.data_properties():
+            similarity = _get_similarity(owl_label, _extract_label(ind.label), method)
+            if max_val < similarity:
+                max_val = similarity
+                max_label = ind.label.en.first()
+
+        # Check similarity with all annotation properties in the ontology.
+        for ind in ONTO.annotation_properties():
+            similarity = _get_similarity(owl_label, _extract_label(ind.label), method)
+            if max_val < similarity:
+                max_val = similarity
+                max_label = ind.label.en.first()
+
+        # Return the properties of the closest match along with the similarity score.
+        return get_object_properties(max_label), max_val
+    else:
+        return ret, 1  # If the exact match is found, return its properties with a similarity of 1.
+
