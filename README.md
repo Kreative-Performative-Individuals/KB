@@ -186,7 +186,6 @@ Currently only the Levenshtein distance has been implemented, and changing the m
 >>> get_closest_class_instances('wrong_class')
 (['good_cycles_sum'], 0.33333333333333337)
 ```
-
 ---
 
 
@@ -236,6 +235,7 @@ This function retrieves various properties of an ontology element, such as its d
 >>> get_object_properties('wrong_label')
 DOUBLE OR NONE REFERENCED KPI
 ```
+---
 
 
 ### `get_closest_object_properties(owl_label, method='levenshtein')`
@@ -278,6 +278,7 @@ Currently, only the Levenshtein distance has been implemented and changing the m
   'entity_type': 'instance'},
  0.2941176470588235)
 ```
+---
 
 
 ### `add_kpi(superclass, label, description, unit_of_measure, parsable_computation_formula, human_readable_formula=None, depends_on_machine=False, depends_on_operation=False)`
