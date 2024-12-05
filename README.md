@@ -80,3 +80,79 @@ This function works recursively to resolve all nested KPI references in the form
 >>> get_formulas('wrong_kpi')
 DOUBLE OR NONE REFERENCED KPI
 ```
+
+
+### `get_closest_kpi_formulas(kpi, method='levenshtein')`
+
+**Description:**  
+Finds the formulas associated with a KPI or the closest matching KPI. If no formula is found for the given KPI, this function calculates similarity scores between the KPI and other ontology entities, returning formulas for the closest match.
+
+**Parameters:**
+- `kpi` (str): The label of the KPI to search for.
+- `method` (str, optional): The similarity metric to use (default is 'levenshtein').
+
+**Returns:**
+- `formulas` (dict): A dictionary mapping KPI labels to their formulas.
+- `similarity` (float): The similarity score (1 for exact matches).
+
+### Notes
+If no exact match is found for the given KPI, the function will calculate the similarity to other KPIs using the specified method, such as Levenshtein distance, and return the formulas associated with the closest match.  
+Currently, only the Levenshtein distance has been implemented, and changing the method will generate an error.
+
+### Examples
+```
+>>> get_closest_kpi_formulas('total_carbon_footprint')
+({'total_carbon_footprint': 'A°sum°mo[S°*[ R°total_consumption°T°m°o° ; C°400°]]',
+  'total_consumption': 'S°+[ R°consumption_sum°T°M°idle° ; R°consumption_sum°T°M°offline° ; R°consumption_sum°T°M°working° ]',
+  'consumption_sum': 'A°sum°mo[ A°sum°t[ D°consumption_sum°t°m°o° ] ]'},
+ 1)
+
+>>> get_closest_kpi_formulas('wrong_kpi')
+({'operative_consumption': 'S°+[ R°consumption_sum°T°M°idle° ; R°consumption_sum°T°M°working° ]',
+  'consumption_sum': 'A°sum°mo[ A°sum°t[ D°consumption_sum°t°m°o° ] ]'},
+ 0.23809523809523814)
+```
+
+
+### `get_instances(owl_class_label)`
+
+**Description:**  
+Retrieves all instances of a given OWL class. If the input label corresponds to a class, instances of the class and its subclasses are returned. If the label corresponds to an individual, it is directly returned.
+
+**Parameters:**
+- `owl_class_label` (str): The label of the OWL class or instance to search for.
+
+**Returns:**
+- `list`: Labels of all matching instances, or an empty list if none are found.
+
+### Notes
+This function was designed to allow not only the expansion of a class into all its individuals, thus giving the possibility of referring to sets of individuals with aggregating terms, but also to disambiguate situations in which it is not known whether a label belongs to an individual or a class.
+
+### Examples
+```
+>>> get_instances('metal_cutting_machine')
+['large_capacity_cutting_machine_2',
+ 'large_capacity_cutting_machine_1',
+ 'medium_capacity_cutting_machine_3',
+ 'medium_capacity_cutting_machine_2',
+ 'low_capacity_cutting_machine_1',
+ 'medium_capacity_cutting_machine_1']
+
+>>> get_instances('energy_kpi')
+['power_max',
+ 'power_avg',
+ 'total_consumption',
+ 'carbon_footprint_per_cycle',
+ 'consumption_avg',
+ 'power_cumulative',
+ 'total_carbon_footprint',
+ 'power_min',
+ 'operative_consumption',
+ 'consumption_min',
+ 'consumption_sum',
+ 'energy_efficiency',
+ 'consumption_max']
+
+>>> get_instances('wrong_class')
+DOUBLE OR NONE REFERENCED KPI
+```
