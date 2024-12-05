@@ -54,6 +54,7 @@ If `backup_number` is not provided, the function will automatically determine th
 >>> start(1)
 Ontology successfully initialized!
 ```
+---
 
 
 ### `get_formulas(kpi)`
@@ -80,6 +81,7 @@ This function works recursively to resolve all nested KPI references in the form
 >>> get_formulas('wrong_kpi')
 DOUBLE OR NONE REFERENCED KPI
 ```
+---
 
 
 ### `get_closest_kpi_formulas(kpi, method='levenshtein')`
@@ -112,6 +114,7 @@ Currently, only the Levenshtein distance has been implemented, and changing the 
   'consumption_sum': 'A°sum°mo[ A°sum°t[ D°consumption_sum°t°m°o° ] ]'},
  0.23809523809523814)
 ```
+---
 
 
 ### `get_instances(owl_class_label)`
@@ -156,6 +159,7 @@ This function was designed to allow not only the expansion of a class into all i
 >>> get_instances('wrong_class')
 DOUBLE OR NONE REFERENCED KPI
 ```
+---
 
 
 ### `get_closest_class_instances(owl_class_label, method='levenshtein')`
