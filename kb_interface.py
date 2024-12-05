@@ -34,10 +34,12 @@ KPI_CLASS = None  # Ontology class for Key Performance Indicators (KPIs)
 
 def start(backup_number=1):
     """
-    Initializes the global ontology and related variables.
-
+    Initializes the global ontology and related variables. 
+    This function must necessarily be called every time it is desired 
+    to initialize the KB and use other methods to interact.
+    
     Parameters:
-    - backup_number (int, optional): The number indicating which backup file to load.
+    - backup_number (int, optional): The number indicating which backup file to load, inside the backup folder.
       If not specified, it reads the configuration file to determine the latest backup.
 
     Global Variables Modified:
@@ -51,7 +53,7 @@ def start(backup_number=1):
     global UNIT_OF_MEASURE, DEPENDS_ON, OPERATION_CASS, MACHINE_CASS, KPI_CLASS
 
     if backup_number:
-        # Load ontology from the specified backup number
+        # Load ontology with the specified backup number
         ONTO = or2.get_ontology(str(MAIN_DIR / (str(backup_number - 1) + '.owl'))).load()
         SAVE_INT = backup_number
         # Update the configuration file with the new backup number
@@ -72,9 +74,6 @@ def start(backup_number=1):
     OPERATION_CASS = ONTO.search(label='operation')[0]
     MACHINE_CASS = ONTO.search(label='machine')[0]
     KPI_CLASS = ONTO.search(label='kpi')[0]
-
-    # Set environment variable for Kaggle compatibility
-    os.environ["KAGGLE_CONFIG_DIR"] = "./backups"
 
     # Print success message
     print("Ontology successfully initialized!")
@@ -187,7 +186,7 @@ def get_formulas(kpi):
     - kpi (str): The label of the KPI whose formulas need to be expanded.
 
     Returns:
-    - kpi_formula (dict): A dictionary mapping KPI labels to their fully unrolled formulas.
+    - kpi_formula (dict): A dictionary mapping KPI labels to their formulas.
     """
     # Search for the KPI in the ontology.
     target = ONTO.search(label=kpi)
@@ -201,7 +200,7 @@ def get_formulas(kpi):
     
     # Verify the target is a KPI.
     if not any(issubclass(cls, KPI_CLASS) for cls in target.is_a):
-        print(kpi + "IS NOT A VALID KPI")
+        print(kpi,"IS NOT A VALID KPI")
         return
     
     # Initialize lists for formulas to unroll and store resolved formulas.
@@ -210,9 +209,12 @@ def get_formulas(kpi):
     
     # Expand all formulas by resolving nested KPI references.
     while to_unroll:
+        # Match every KPI reference contained in the formula to_unroll[0]
         matches = re.findall(r'R°[A-Za-z_]+°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', to_unroll.pop(0))
         
         for match in matches:
+            # For every macth append the kpi to to_unroll and save the data to be returnedù
+            # And recursively match KPI references
             kpi_name = re.match(r'R°([A-Za-z_]+)°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', match).group(1)
             target = ONTO.search(label=kpi_name)
             
@@ -239,7 +241,7 @@ def get_closest_kpi_formulas(kpi, method='levenshtein'):
 
     Returns:
     - tuple:
-      - formulas (dict): The formulas of the found KPI.
+      - formulas (dict): A dictionary mapping KPI labels to their formulas.
       - similarity (float): The similarity score (1 for exact matches).
     """
     # Attempt to retrieve the exact formulas for the given KPI.
@@ -251,7 +253,7 @@ def get_closest_kpi_formulas(kpi, method='levenshtein'):
         max_label = ''
         
         # Compare the KPI with all individuals in the ontology.
-        for ind in ONTO.individuals():
+        for ind in KPI_CLASS.instances():
             similarity = _get_similarity(kpi, ind.label.en.first(), method)
             if max_val < similarity:
                 max_val = similarity
@@ -290,7 +292,7 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
     
     # Validate that the KPI label does not already exist.
     if ONTO.search(label=label):
-        print("KPI LABEL ALREADY EXISTS")
+        print('KPI', label, 'ALREADY EXISTS')
         return
     
     # Validate that the superclass is defined and unique.
@@ -323,12 +325,13 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
         DEPENDS_ON[new_el] = [MACHINE_CASS]
     
     _backup()  # Save changes.
+    print('KPI', label, 'successfully added to the ontology!')
 
 
 
 def get_instances(owl_class_label):
     """
-    Retrieves all instances of a given OWL class or individual.
+    Retrieves all instances of a given OWL class.
 
     If the input label corresponds to a class, instances of the class and its subclasses are returned.
     If the label corresponds to an individual, it is directly returned.
@@ -423,20 +426,22 @@ def get_closest_class_instances(owl_class_label, method='levenshtein'):
 def get_object_properties(owl_label):
     """
     Retrieves all the properties (annotation, object, and data properties) associated with an ontology entity
-    based on its label. It also gathers information about superclasses, subclasses, and instances if the element
-    is a class or individual.
+    based on its label. It also returns information about superclasses, subclasses, and instances if the element
+    is a class or individual and entity_type.
 
     Args:
         owl_label (str): The label of the ontology element (class or individual) whose properties are to be retrieved.
 
     Returns:
-        dict: A dictionary containing the properties associated with the element, including:
+        dict: A dictionary containing the information associated with the entity, including:
             - 'label': The label of the element.
             - 'description': The description annotation property, if available.
-            - 'depends_on_other_kpi': A list of KPI names the element depends on (for a specific property).
+            - 'depends_on_other_kpi': A list of KPI labels the element depends on based on the parsable computational formula.
             - 'superclasses': List of superclasses of the element (for classes and individuals).
             - 'subclasses': List of subclasses of the element (for classes).
             - 'instances': List of instances of the element (for classes).
+            - 'entity_type': The nature of the referred entity which can be class, istance or property 
+            - 'ontology_property_name': List of every entity related to the referenced entoty with the 'ontology_property_name' property
     """
     # Search for the target element using its label in the ontology.
     target = ONTO.search(label=owl_label)
@@ -501,9 +506,8 @@ def get_object_properties(owl_label):
     
 def get_closest_object_properties(owl_label, method='levenshtein'):
     """
-    Retrieves the properties of the ontology element that is the closest match to the given label (`owl_label`).
-    The closeness is determined by a similarity measure (default is Levenshtein distance), and the function
-    returns the properties of the most similar element found.
+    Apply get_object_properties to the entity whose label is the closest match to the given label.
+    The closeness is determined by a similarity measure (default is Levenshtein distance).
 
     Args:
         owl_label (str): The label of the ontology element whose closest match is to be found.
