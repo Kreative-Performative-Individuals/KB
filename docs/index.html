@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Repository of Topic 1 - KB and KPI Ontology</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        header, main {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        header h1 {
+            font-size: 1.8em;
+            margin-bottom: 0.5em;
+        }
+        header p {
+            margin: 0;
+        }
+        h2 {
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+            margin-top: 1.5em;
+        }
+        ul {
+            list-style: square;
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        strong {
+            font-weight: bold;
+        }
+        a {
+            color: #0066cc;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        pre {
+            background: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Repository of Topic 1 - KB and KPI Ontology</h1>
+        <p><strong>Version:</strong> 1.0.3</p>
+        <p><strong>Last Update:</strong> 24/11/2024</p>
+        <p><strong>Authors:</strong> Giacomo Aru (KB Design, KB Implementation), Simone Marzeddu (KB Design, KPI Selection, KB Population, Documentation)</p>
+    </header>
+    <main>
+        <h2>Description</h2>
+        <p>
+            This repository contains the code developed for Topic 1 and the ontology in OWL format.
+            The code is used to query the Knowledge Base (KB) to retrieve specific information and to add or modify individuals in the KB.
+        </p>
+        <p>
+            At present, KPIs (pure and derived) have been defined and will be included in the Knowledge Base by the final version of the product.
+            The list of these KPIs is available
+            <a href="https://docs.google.com/document/d/1RMJVM6Xd4dcazlPhCdCzNqwm6lIBSvDHMgVil6wiLNI/edit?tab=t.0#heading=h.equ5lulcmq18" target="_blank">here</a>.
+        </p>
+        <p>
+            Please note that the current Knowledge Base prototype only supports the following KPIs:
+        </p>
+        <ul>
+            <li><strong>Pure KPIs</strong>:
+                <ul>
+                    <li>Machine Usage KPIs -> Utilization KPIs -> <code>time_sum</code>, <code>time_avg</code>, <code>time_min</code>, <code>time_max</code></li>
+                    <li>Energy KPIs -> Consumption KPIs -> <code>consumption_sum</code>, <code>consumption_avg</code>, <code>consumption_min</code>, <code>consumption_max</code>, <code>power_avg</code>, <code>power_min</code>, <code>power_max</code></li>
+                    <li>Production KPIs -> Cycles KPIs -> <code>cycles_sum</code>, <code>cycles_avg</code>, <code>cycles_min</code>, <code>cycles_max</code>, <code>average_cycle_time_avg</code></li>
+                    <li>Production KPIs -> Efficiency KPIs -> <code>good_cycles_sum</code>, <code>good_cycles_avg</code>, <code>good_cycles_min</code>, <code>good_cycles_max</code>, <code>bad_cycles_sum</code>, <code>bad_cycles_avg</code>, <code>bad_cycles_min</code>, <code>bad_cycles_max</code></li>
+                    <li>Financial KPIs -> Cost KPIs -> <code>cost_sum</code>, <code>cost_avg</code>, <code>cost_min</code>, <code>cost_max</code></li>
+                </ul>
+            </li>
+            <li><strong>Derived KPIs</strong>:
+                <ul>
+                    <li>Machine Usage KPIs -> Utilization KPIs -> <code>utilization_rate</code>, <code>availability</code></li>
+                    <li>Machine Usage KPIs -> Downtime KPIs -> <code>non_operative_time</code>, <code>mean_time_between_failures</code></li>
+                    <li>Energy KPIs -> Consumption KPIs -> <code>power_cumulative</code>, <code>power_mean</code>, <code>energy_efficiency</code>, <code>total_consumption</code>, <code>operative_consumption</code></li>
+                    <li>Energy KPIs -> Sustainability KPIs -> <code>total_carbon_footprint</code>, <code>carbon_footprint_per_cycle</code></li>
+                    <li>Production KPIs -> Efficiency KPIs -> <code>success_rate</code>, <code>failure_rate</code>, <code>overall_equipment_effectiveness</code></li>
+                    <li>Financial KPIs -> Cost KPIs -> <code>cost_per_cycle</code>, <code>total_energy_cost</code></li>
+                </ul>
+            </li>
+        </ul>
+
+        <h2>Methods and Documentation</h2>
+        <p>The Python implementation offers a library of methods for interaction with the Knowledge Base, with additional methods for other relevant operations. Documentation of the methods offered follows:</p>
+        <ul>
+            <li><strong>"start"</strong>: Initializes the global ontology and related variables.
+                <pre><code>
+This function reads a configuration file to determine the most recent ontology backup,
+loads the corresponding ontology file, and extracts key elements for computation and reasoning.
+                </code></pre>
+            </li>
+            <!-- Include other method descriptions similarly here -->
+        </ul>
+    </main>
+</body>
+</html>
