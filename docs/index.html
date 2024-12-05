@@ -61,127 +61,139 @@
 <body>
     <header>
         <h1>API Documentation</h1>
-        <p>Version: 1.0.0 | Last Updated: [Insert Date]</p>
-        <p>Author: [Your Name or Team]</p>
+        <p>Version: 1.1.0 | Last Updated: 05/12/2024</p>
+        <p>Authors: Giacomo Aru (KB Design, KB Implementation), Simone Marzeddu (KB Design, KPI Selection, KB Population, Documentation)</p>
     </header>
     <main>
         <h2>Introduction</h2>
         <p>
-            This document outlines the API endpoints, their purposes, input parameters, and expected outputs.
-            Use this documentation as a reference for integrating with the API. Prova Pazzerella
+            This is the documentation for the Python interface implemented by Topic 1 to allow interaction with the Knowledge Base. 
+			The code and ontology in owl format can be found in the GitHub repository at the link. 
+			A detailed description of the ontology including structure and individuals present, on the other hand, can be found at the link.
+			<br>
+			Please note that the current implementation is only a prototype with basic and necessary functionality to make it work.
+			<br>
+			Below we have the list of KPIs currently in the ontology with a reference to the taxonomic structure:
+			<ul>
+			  <li><strong>Pure KPIs</strong>:
+				<ul>
+				  <li>Machine Usage KPIs -> Utilization KPIs -> <code>time_sum</code>, <code>time_avg</code>, <code>time_min</code>, <code>time_max</code></li>
+				  <li>Energy KPIs -> Consumption KPIs -> <code>consumption_sum</code>, <code>consumption_avg</code>, <code>consumption_min</code>, <code>consumption_max</code>, <code>power_avg</code>, <code>power_min</code>, <code>power_max</code></li>
+				  <li>Production KPIs -> Cycles KPIs -> <code>cycles_sum</code>, <code>cycles_avg</code>, <code>cycles_min</code>, <code>cycles_max</code>, <code>average_cycle_time_avg</code></li>
+				  <li>Production KPIs -> Efficiency KPIs -> <code>good_cycles_sum</code>, <code>good_cycles_avg</code>, <code>good_cycles_min</code>, <code>good_cycles_max</code>, <code>bad_cycles_sum</code>, <code>bad_cycles_avg</code>, <code>bad_cycles_min</code>, <code>bad_cycles_max</code></li>
+				  <li>Financial KPIs -> Cost KPIs -> <code>cost_sum</code>, <code>cost_avg</code>, <code>cost_min</code>, <code>cost_max</code></li>
+				</ul>
+			  </li>
+			  
+			  <li><strong>Derived KPIs</strong>:
+				<ul>
+				  <li>Machine Usage KPIs -> Utilization KPIs -> <code>utilization_rate</code>, <code>availability</code></li>
+				  <li>Machine Usage KPIs -> Downtime KPIs -> <code>non_operative_time</code>, <code>mean_time_between_failures</code></li>
+				  <li>Energy KPIs -> Consumption KPIs -> <code>power_cumulative</code>, <code>power_mean</code>, <code>energy_efficiency</code>, <code>total_consumption</code>, <code>operative_consumption</code></li>
+				  <li>Energy KPIs -> Sustainability KPIs -> <code>total_carbon_footprint</code>, <code>carbon_footprint_per_cycle</code></li>
+				  <li>Production KPIs -> Efficiency KPIs -> <code>success_rate</code>, <code>failure_rate</code>, <code>overall_equipment_effectiveness</code></li>
+				  <li>Financial KPIs -> Cost KPIs -> <code>cost_per_cycle</code>, <code>total_energy_cost</code></li>
+				</ul>
+			  </li>
+			</ul>
+
         </p>
 
-        <h2>Base URL</h2>
-        <p><code>https://api.example.com/v1</code></p>
+        <h2>Methods and Documentation</h2>
+		
+		<h3><code>start(backup_number=1)</code></h3>
+		<p>
+			<strong>Description:</strong> Initializes the global ontology and related variables. 
+			This function must necessarily be called every time it is desired to initialize the KB and use other methods to interact.
+		</p>
 
-        <h2>Endpoints</h2>
-        <h3>1. <code>GET /users</code></h3>
-        <p><strong>Description:</strong> Retrieve a list of users.</p>
-        <p><strong>Parameters:</strong></p>
-        <ul>
-            <li><code>page</code> (optional, int): Page number for pagination.</li>
-            <li><code>limit</code> (optional, int): Number of users per page.</li>
-        </ul>
-        <p><strong>Response:</strong></p>
-        <pre><code>
-{
-    "status": "success",
-    "data": [
-        { "id": 1, "name": "John Doe", "email": "john.doe@example.com" },
-        { "id": 2, "name": "Jane Doe", "email": "jane.doe@example.com" }
-    ]
-}
-        </code></pre>
+		<p><strong>Parameters:</strong></p>
+		<ul>
+		  <li><code>backup_number</code> (optional, int): The number indicating which backup file to load, inside the backup folder. If not specified, it reads the configuration file to determine the latest backup.</li>
+		</ul>
 
-        <h3>2. <code>POST /users</code></h3>
-        <p><strong>Description:</strong> Create a new user.</p>
-        <p><strong>Request Body:</strong></p>
-        <pre><code>
-{
-    "name": "John Doe",
-    "email": "john.doe@example.com",
-    "password": "securepassword123"
-}
-        </code></pre>
-        <p><strong>Response:</strong></p>
-        <pre><code>
-{
-    "status": "success",
-    "message": "User created successfully.",
-    "data": { "id": 3, "name": "John Doe", "email": "john.doe@example.com" }
-}
-        </code></pre>
+		<p><strong>Global Variables Modified:</strong></p>
+		<ul>
+		  <li><code>SAVE_INT</code>: Save interval value read or set.</li>
+		  <li><code>ONTO</code>: The ontology object loaded from the backup.</li>
+		  <li><code>PARSABLE_FORMULA</code>, <code>HUMAN_READABLE_FORMULA</code>, <code>UNIT_OF_MEASURE</code>, <code>DEPENDS_ON</code>, <code>OPERATION_CASS</code>, <code>MACHINE_CASS</code>, <code>KPI_CLASS</code>: Specific ontology classes extracted.</li>
+		</ul>
 
-        <h3>3. <code>GET /users/{id}</code></h3>
-        <p><strong>Description:</strong> Retrieve details of a specific user.</p>
-        <p><strong>Parameters:</strong></p>
-        <ul>
-            <li><code>id</code> (required, int): The ID of the user.</li>
-        </ul>
-        <p><strong>Response:</strong></p>
-        <pre><code>
-{
-    "status": "success",
-    "data": { "id": 1, "name": "John Doe", "email": "john.doe@example.com" }
-}
-        </code></pre>
+		<h3>Notes</h3>
+		<p>If <code>backup_number</code> is not provided, the function will automatically determine the latest backup from the configuration file.
+		Ensure that the backup folder is properly structured and contains valid backup files, and also that the configuration file exists and contains only a numeric value,
+		to avoid errors during initialization.</p>
 
-        <h3>4. <code>PUT /users/{id}</code></h3>
-        <p><strong>Description:</strong> Update a user's information.</p>
-        <p><strong>Request Body:</strong></p>
-        <pre><code>
-{
-    "name": "John Smith",
-    "email": "john.smith@example.com"
-}
-        </code></pre>
-        <p><strong>Response:</strong></p>
-        <pre><code>
-{
-    "status": "success",
-    "message": "User updated successfully."
-}
-        </code></pre>
+		<h3>Examples</h3>
+		<pre>
+>>> start(1);
+Ontology successfully initialized!</pre>
+		
+		<hr style="border: 1px solid #000000; margin: 50px auto;">
+		
+		<h3><code>get_formulas(kpi)</code></h3>
+		<p>
+		  <strong>Description:</strong> Retrieves and expands formulas associated with a given KPI. 
+		  This function identifies the formula for a KPI and recursively unrolls any nested KPIs 
+		  referenced within the formula until all dependencies are fully resolved.
+		</p>
 
-        <h3>5. <code>DELETE /users/{id}</code></h3>
-        <p><strong>Description:</strong> Delete a user.</p>
-        <p><strong>Parameters:</strong></p>
-        <ul>
-            <li><code>id</code> (required, int): The ID of the user.</li>
-        </ul>
-        <p><strong>Response:</strong></p>
-        <pre><code>
-{
-    "status": "success",
-    "message": "User deleted successfully."
-}
-        </code></pre>
+		<p><strong>Parameters:</strong></p>
+		<ul>
+		  <li><code>kpi</code> (str): The label of the KPI whose formulas need to be expanded.</li>
+		</ul>
 
-        <h2>Error Handling</h2>
-        <p>All error responses will follow this structure:</p>
-        <pre><code>
-{
-    "status": "error",
-    "message": "Error description",
-    "code": 400
-}
-        </code></pre>
+		<p><strong>Returns:</strong></p>
+		<ul>
+		  <li><code>kpi_formula</code> (dict): A dictionary mapping KPI labels to their formulas.</li>
+		</ul>
 
-        <h2>Authentication</h2>
-        <p>
-            The API uses token-based authentication. Include a header in your requests:
-        </p>
-        <pre><code>Authorization: Bearer {token}</code></pre>
+		<h3>Notes</h3>
+		<p>This function works recursively to resolve all nested KPI references in the formula. 
+		It ensures that all dependencies are properly expanded before returning the final formula.
+		If it receives as input a non-existent label returns None.</p>
 
-        <h2>Rate Limiting</h2>
-        <p>
-            Each user is allowed 1000 requests per hour. Exceeding this limit will result in a <code>429 Too Many Requests</code> error.
-        </p>
+		<h3>Examples</h3>
+<pre>
+>>> get_formulas('total_carbon_footprint');
+{'total_carbon_footprint': 'A°sum°mo[S°*[ R°total_consumption°T°m°o° ; C°400°]]',
+ 'total_consumption': 'S°+[ R°consumption_sum°T°M°idle° ; R°consumption_sum°T°M°offline° ; R°consumption_sum°T°M°working° ]',
+ 'consumption_sum': 'A°sum°mo[ A°sum°t[ D°consumption_sum°t°m°o° ] ]'}
+ 
+>>>get_formulas('wrong_kpi')
+DOUBLE OR NONE REFERENCED KPI</pre>
 
-        <h2>Contact</h2>
-        <p>
-            For further assistance, contact our support team at <a href="mailto:support@example.com">support@example.com</a>.
-        </p>
+		<hr style="border: 1px solid #000000; margin: 50px auto;">
+		
+		<h3><code>get_closest_kpi_formulas(kpi, method='levenshtein')</code></h3>
+		<p>
+		  <strong>Description:</strong> Finds the formulas associated with a KPI or the closest matching KPI. 
+		  If no formula is found for the given KPI, this function calculates similarity scores between 
+		  the KPI and other ontology entities, returning formulas for the closest match.
+		</p>
+
+		<p><strong>Parameters:</strong></p>
+		<ul>
+		  <li><code>kpi</code> (str): The label of the KPI to search for.</li>
+		  <li><code>method</code> (str, optional): The similarity metric to use (default is 'levenshtein').</li>
+		</ul>
+
+		<p><strong>Returns:</strong></p>
+		<ul>
+		  <li><code>formulas</code> (dict): A dictionary mapping KPI labels to their formulas.</li>
+		  <li><code>similarity</code> (float): The similarity score (1 for exact matches).</li>
+		</ul>
+
+		<h3>Notes</h3>
+		<p>If no exact match is found for the given KPI, the function will calculate the similarity to other KPIs using the specified method, such as Levenshtein distance, and return the formulas associated with the closest match.</p>
+
+		<h3>Examples</h3>
+<pre>
+>>> get_closest_kpi_formulas("sales_performance");
+({'sales_performance': 'revenue * efficiency'}, 0.95)
+</pre>
+
+
     </main>
 </body>
 </html>
