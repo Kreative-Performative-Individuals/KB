@@ -156,3 +156,164 @@ This function was designed to allow not only the expansion of a class into all i
 >>> get_instances('wrong_class')
 DOUBLE OR NONE REFERENCED KPI
 ```
+
+
+### `get_closest_class_instances(owl_class_label, method='levenshtein')`
+
+**Description:**  
+Retrieves all instances of a given OWL class or individual. If no exact match is found, the function searches for the most similar element in the knowledge base using a similarity method.
+
+**Parameters:**
+- `owl_class_label` (str): The label of the class or individual to search for.
+- `method` (str): The similarity method (default is 'levenshtein').
+
+**Returns:**
+- `list`: Instances of the closest matching class or individual.
+- `float`: The similarity score of the closest match.
+
+### Notes
+If an exact match for the provided label is not found, this function calculates the similarity between the label and other elements in the knowledge base using the specified method, and returns the correct answer with respect to the entity found.  
+Currently only the Levenshtein distance has been implemented, and changing the method will generate an error.
+
+### Examples
+```
+>>> get_closest_class_instances('testing_machine')
+(['testing_machine_3', 'testing_machine_1', 'testing_machine_2'], 1)
+
+>>> get_closest_class_instances('generic_operation')
+(['offline', 'working', 'idle', 'independent'], 1)
+
+>>> get_closest_class_instances('wrong_class')
+(['good_cycles_sum'], 0.33333333333333337)
+```
+
+---
+
+
+### `get_object_properties(owl_label)`
+
+**Description:**  
+Retrieves all the properties (annotation, object, and data properties) associated with an ontology entity based on its label. It also returns information about superclasses, subclasses, and instances if the element is a class or individual, as well as the entity type.
+
+**Parameters:**
+- `owl_label` (str): The label of the ontology element (class or individual) whose properties are to be retrieved.
+
+**Returns:**
+- `dict`: A dictionary containing the information associated with the entity, including:
+  - `label`: The label of the element.
+  - `description`: The description annotation property, if available.
+  - `depends_on_other_kpi`: A list of KPI labels the element depends on based on the parsable computational formula.
+  - `superclasses`: List of superclasses of the element (for classes and individuals).
+  - `subclasses`: List of subclasses of the element (for classes).
+  - `instances`: List of instances of the element (for classes).
+  - `entity_type`: The nature of the referred entity, which can be class, instance, or property.
+  - `ontology_property_name`: List of every entity related to the referenced entity with the 'ontology_property_name' property.
+
+### Notes
+This function retrieves various properties of an ontology element, such as its description, dependencies, and hierarchical relationships, including its superclasses, subclasses, instances, and entity type. For each property (annotation, object, and datatype), the dictionary contains an element that has as its key the label of the property and as its value the list of values or entities associated through the property itself.
+
+### Examples
+```
+>>> get_object_properties('depends_on')
+{'label': 'depends_on',
+ 'description': 'This object property defines a dependency relationship between a Key Performance Indicator (KPI) and other entities such as machines or operations. It specifies the contextual elements required for calculating or interpreting a KPI. The domain of this property is KPI, and its range includes classes like Machine and Operation. A KPI may have multiple dependsOn relationships, or none, if it is independent of specific contexts.',
+ 'entity_type': 'property'}
+
+>>> get_object_properties('working')
+{'label': 'working',
+ 'description': 'The machine is fully operational and actively performing its designated tasks or functions.',
+ 'superclasses': ['generic_operation'],
+ 'entity_type': 'instance'}
+
+>>> get_object_properties('energy_kpi')
+{'label': 'energy_kpi',
+ 'description': 'Energy KPIs are metrics used to assess and optimize an organization’s energy consumption, efficiency, and sustainability. These indicators help companies monitor their energy usage, identify areas to reduce waste, lower costs, and minimize their environmental impact.',
+ 'superclasses': ['kpi'],
+ 'subclasses': ['energy_efficiency_kpi', 'sustainability_kpi', 'consumption_kpi'],
+ 'instances': ['power_max', 'power_avg', 'total_consumption', 'carbon_footprint_per_cycle', 'consumption_avg', 'power_cumulative', 'total_carbon_footprint', 'power_min', 'operative_consumption', 'consumption_min', 'consumption_sum', 'energy_efficiency', 'consumption_max'],
+ 'entity_type': 'class'}
+
+>>> get_object_properties('wrong_label')
+DOUBLE OR NONE REFERENCED KPI
+```
+
+
+### `get_closest_object_properties(owl_label, method='levenshtein')`
+
+**Description:**  
+Apply `get_object_properties` to the entity whose label is the closest match to the given label. The closeness is determined by a similarity measure (default is Levenshtein distance).
+
+**Parameters:**
+- `owl_label` (str): The label of the ontology element whose closest match is to be found.
+- `method` (str): The similarity measure to use for finding the closest match (default: 'levenshtein').
+
+**Returns:**
+- `tuple`: A tuple containing:
+  - `dict`: The properties of the closest matching element.
+  - `float`: The similarity score (between 0 and 1) of the closest match.
+
+### Notes
+If no exact match for the given label is found, the function uses the specified similarity measure (e.g., Levenshtein distance) to find the closest match in the ontology and returns its properties along with the similarity score.  
+Currently, only the Levenshtein distance has been implemented and changing the method will generate an error.
+
+### Examples
+```
+>>> get_closest_object_properties('total_carbon_footprint')
+({'label': 'total_carbon_footprint',
+  'description': 'This KPI is a sustainability metric that measures the amount of CO2 emissions produced globally for a process, machine, or system. It provides insights into the environmental impact, enabling organizations to track and reduce their carbon emissions.',
+  'unit_of_measure': 'CO2 Emissions',
+  'human_readable_formula': 'sum_M_O(total_consumption(T,m,o)*estimated_italian_emission_factor(400))',
+  'depends_on': ['operation', 'machine'],
+  'parsable_computation_formula': 'A°sum°mo[S°*[ R°total_consumption°T°m°o° ; C°400°]]',
+  'depends_on_other_kpi': ['total_consumption'],
+  'superclasses': ['sustainability_kpi'],
+  'entity_type': 'instance'},
+ 1)
+
+>>> get_closest_object_properties('wrong_label')
+({'label': 'testing_machine_2',
+  'location': 'floor_2',
+  'database_id': 'ast-pu7dfrxjf2ms',
+  'superclasses': ['testing_machine'],
+  'entity_type': 'instance'},
+ 0.2941176470588235)
+```
+
+
+### `add_kpi(superclass, label, description, unit_of_measure, parsable_computation_formula, human_readable_formula=None, depends_on_machine=False, depends_on_operation=False)`
+
+**Description:**  
+Adds a new KPI to the ontology. This function validates that the KPI's label and superclass are unique and correctly defined. It then creates the KPI and associates the provided attributes, formulas, and dependencies.
+
+**Parameters:**
+- `superclass` (str): The label of the superclass for the KPI.
+- `label` (str): The unique label for the KPI.
+- `description` (str): A text description of the KPI.
+- `unit_of_measure` (str): The measurement unit for the KPI.
+- `parsable_computation_formula` (str): A machine-readable formula for the KPI.
+- `human_readable_formula` (str, optional): A user-friendly formula (default is the parsable formula).
+- `depends_on_machine` (bool, optional): Whether the KPI depends on machines.
+- `depends_on_operation` (bool, optional): Whether the KPI depends on operations.
+
+**Returns:**
+- `None`: Prints errors or creates the KPI instance.
+
+### Notes
+This function ensures that the KPI's label and superclass are unique within the ontology. It will also handle dependencies on machines and operations if specified.
+
+### Examples
+```
+>>> new_kpi_inputs = ['utilization_kpi', 
+                     'availability', 
+                     'Percentage of machine uptime in respect to machine downtime over each machine-operation pairs', 
+                     '%', 
+                     'S°*[ S°/[ A°sum°m[ R°time_sum°T°m°working° ] ; S°+[ A°sum°m[ R°time_sum°T°m°idle° ] ; A°sum°m[ R°time_sum°T°m°offline° ] ] ] ; C°100° ]',
+                     '(sum_M( time_sum(T,m,working)) / ( sum_M(time_sum(T,m,Idle)) + sum_M(time_sum(T,m,offline)) ) )*100',
+                     True,
+                     True]
+>>> add_kpi(*new_kpi_inputs)
+KPI availability successfully added to the ontology!
+
+>>> add_kpi(*new_kpi_inputs)
+KPI availability ALREADY EXISTS
+```
