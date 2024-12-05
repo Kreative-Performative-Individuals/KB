@@ -4,14 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Repository of Topic 1 - KB and KPI Ontology</title>
+    <title>API Documentation</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             line-height: 1.6;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #f9f9f9;
             color: #333;
         }
         header, main {
@@ -22,11 +22,12 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         header h1 {
-            font-size: 1.8em;
+            font-size: 2em;
             margin-bottom: 0.5em;
         }
         header p {
             margin: 0;
+            color: #555;
         }
         h2 {
             border-bottom: 2px solid #333;
@@ -38,8 +39,15 @@
             margin: 10px 0;
             padding-left: 20px;
         }
-        strong {
-            font-weight: bold;
+        code, pre {
+            background: #f4f4f4;
+            padding: 5px;
+            border: 1px solid #ddd;
+            font-family: Consolas, monospace;
+        }
+        pre {
+            overflow-x: auto;
+            padding: 10px;
         }
         a {
             color: #0066cc;
@@ -48,68 +56,132 @@
         a:hover {
             text-decoration: underline;
         }
-        pre {
-            background: #f9f9f9;
-            padding: 10px;
-            border: 1px solid #ddd;
-            overflow-x: auto;
-        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Repository of Topic 1 - KB and KPI Ontology</h1>
-        <p><strong>Version:</strong> 1.0.3</p>
-        <p><strong>Last Update:</strong> 24/11/2024</p>
-        <p><strong>Authors:</strong> Giacomo Aru (KB Design, KB Implementation), Simone Marzeddu (KB Design, KPI Selection, KB Population, Documentation)</p>
+        <h1>API Documentation</h1>
+        <p>Version: 1.0.0 | Last Updated: [Insert Date]</p>
+        <p>Author: [Your Name or Team]</p>
     </header>
     <main>
-        <h2>Description</h2>
+        <h2>Introduction</h2>
         <p>
-            This repository contains the code developed for Topic 1 and the ontology in OWL format.
-            The code is used to query the Knowledge Base (KB) to retrieve specific information and to add or modify individuals in the KB.
+            This document outlines the API endpoints, their purposes, input parameters, and expected outputs.
+            Use this documentation as a reference for integrating with the API.
         </p>
-        <p>
-            At present, KPIs (pure and derived) have been defined and will be included in the Knowledge Base by the final version of the product.
-            The list of these KPIs is available
-            <a href="https://docs.google.com/document/d/1RMJVM6Xd4dcazlPhCdCzNqwm6lIBSvDHMgVil6wiLNI/edit?tab=t.0#heading=h.equ5lulcmq18" target="_blank">here</a>.
-        </p>
-        <p>
-            Please note that the current Knowledge Base prototype only supports the following KPIs:
-        </p>
-        <ul>
-            <li><strong>Pure KPIs</strong>:
-                <ul>
-                    <li>Machine Usage KPIs -> Utilization KPIs -> <code>time_sum</code>, <code>time_avg</code>, <code>time_min</code>, <code>time_max</code></li>
-                    <li>Energy KPIs -> Consumption KPIs -> <code>consumption_sum</code>, <code>consumption_avg</code>, <code>consumption_min</code>, <code>consumption_max</code>, <code>power_avg</code>, <code>power_min</code>, <code>power_max</code></li>
-                    <li>Production KPIs -> Cycles KPIs -> <code>cycles_sum</code>, <code>cycles_avg</code>, <code>cycles_min</code>, <code>cycles_max</code>, <code>average_cycle_time_avg</code></li>
-                    <li>Production KPIs -> Efficiency KPIs -> <code>good_cycles_sum</code>, <code>good_cycles_avg</code>, <code>good_cycles_min</code>, <code>good_cycles_max</code>, <code>bad_cycles_sum</code>, <code>bad_cycles_avg</code>, <code>bad_cycles_min</code>, <code>bad_cycles_max</code></li>
-                    <li>Financial KPIs -> Cost KPIs -> <code>cost_sum</code>, <code>cost_avg</code>, <code>cost_min</code>, <code>cost_max</code></li>
-                </ul>
-            </li>
-            <li><strong>Derived KPIs</strong>:
-                <ul>
-                    <li>Machine Usage KPIs -> Utilization KPIs -> <code>utilization_rate</code>, <code>availability</code></li>
-                    <li>Machine Usage KPIs -> Downtime KPIs -> <code>non_operative_time</code>, <code>mean_time_between_failures</code></li>
-                    <li>Energy KPIs -> Consumption KPIs -> <code>power_cumulative</code>, <code>power_mean</code>, <code>energy_efficiency</code>, <code>total_consumption</code>, <code>operative_consumption</code></li>
-                    <li>Energy KPIs -> Sustainability KPIs -> <code>total_carbon_footprint</code>, <code>carbon_footprint_per_cycle</code></li>
-                    <li>Production KPIs -> Efficiency KPIs -> <code>success_rate</code>, <code>failure_rate</code>, <code>overall_equipment_effectiveness</code></li>
-                    <li>Financial KPIs -> Cost KPIs -> <code>cost_per_cycle</code>, <code>total_energy_cost</code></li>
-                </ul>
-            </li>
-        </ul>
 
-        <h2>Methods and Documentation</h2>
-        <p>The Python implementation offers a library of methods for interaction with the Knowledge Base, with additional methods for other relevant operations. Documentation of the methods offered follows:</p>
+        <h2>Base URL</h2>
+        <p><code>https://api.example.com/v1</code></p>
+
+        <h2>Endpoints</h2>
+        <h3>1. <code>GET /users</code></h3>
+        <p><strong>Description:</strong> Retrieve a list of users.</p>
+        <p><strong>Parameters:</strong></p>
         <ul>
-            <li><strong>"start"</strong>: Initializes the global ontology and related variables.
-                <pre><code>
-This function reads a configuration file to determine the most recent ontology backup,
-loads the corresponding ontology file, and extracts key elements for computation and reasoning.
-                </code></pre>
-            </li>
-            <!-- Include other method descriptions similarly here -->
+            <li><code>page</code> (optional, int): Page number for pagination.</li>
+            <li><code>limit</code> (optional, int): Number of users per page.</li>
         </ul>
+        <p><strong>Response:</strong></p>
+        <pre><code>
+{
+    "status": "success",
+    "data": [
+        { "id": 1, "name": "John Doe", "email": "john.doe@example.com" },
+        { "id": 2, "name": "Jane Doe", "email": "jane.doe@example.com" }
+    ]
+}
+        </code></pre>
+
+        <h3>2. <code>POST /users</code></h3>
+        <p><strong>Description:</strong> Create a new user.</p>
+        <p><strong>Request Body:</strong></p>
+        <pre><code>
+{
+    "name": "John Doe",
+    "email": "john.doe@example.com",
+    "password": "securepassword123"
+}
+        </code></pre>
+        <p><strong>Response:</strong></p>
+        <pre><code>
+{
+    "status": "success",
+    "message": "User created successfully.",
+    "data": { "id": 3, "name": "John Doe", "email": "john.doe@example.com" }
+}
+        </code></pre>
+
+        <h3>3. <code>GET /users/{id}</code></h3>
+        <p><strong>Description:</strong> Retrieve details of a specific user.</p>
+        <p><strong>Parameters:</strong></p>
+        <ul>
+            <li><code>id</code> (required, int): The ID of the user.</li>
+        </ul>
+        <p><strong>Response:</strong></p>
+        <pre><code>
+{
+    "status": "success",
+    "data": { "id": 1, "name": "John Doe", "email": "john.doe@example.com" }
+}
+        </code></pre>
+
+        <h3>4. <code>PUT /users/{id}</code></h3>
+        <p><strong>Description:</strong> Update a user's information.</p>
+        <p><strong>Request Body:</strong></p>
+        <pre><code>
+{
+    "name": "John Smith",
+    "email": "john.smith@example.com"
+}
+        </code></pre>
+        <p><strong>Response:</strong></p>
+        <pre><code>
+{
+    "status": "success",
+    "message": "User updated successfully."
+}
+        </code></pre>
+
+        <h3>5. <code>DELETE /users/{id}</code></h3>
+        <p><strong>Description:</strong> Delete a user.</p>
+        <p><strong>Parameters:</strong></p>
+        <ul>
+            <li><code>id</code> (required, int): The ID of the user.</li>
+        </ul>
+        <p><strong>Response:</strong></p>
+        <pre><code>
+{
+    "status": "success",
+    "message": "User deleted successfully."
+}
+        </code></pre>
+
+        <h2>Error Handling</h2>
+        <p>All error responses will follow this structure:</p>
+        <pre><code>
+{
+    "status": "error",
+    "message": "Error description",
+    "code": 400
+}
+        </code></pre>
+
+        <h2>Authentication</h2>
+        <p>
+            The API uses token-based authentication. Include a header in your requests:
+        </p>
+        <pre><code>Authorization: Bearer {token}</code></pre>
+
+        <h2>Rate Limiting</h2>
+        <p>
+            Each user is allowed 1000 requests per hour. Exceeding this limit will result in a <code>429 Too Many Requests</code> error.
+        </p>
+
+        <h2>Contact</h2>
+        <p>
+            For further assistance, contact our support team at <a href="mailto:support@example.com">support@example.com</a>.
+        </p>
     </main>
 </body>
 </html>
