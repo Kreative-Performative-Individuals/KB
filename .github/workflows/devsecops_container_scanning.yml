@@ -172,6 +172,7 @@ jobs:
 
   # Container scanning with Trivy
   container-scan:
+    name: Container Scanning
     runs-on: ubuntu-latest
     permissions:
       contents: read            # Required for actions/checkout
