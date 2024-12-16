@@ -894,7 +894,7 @@
   <rdf:type rdf:resource="http://webprotege.stanford.edu/RCdAgvbgwoVAfJkY8gwIsFz"/>
   <webp:RDVJYii8k7nCVLN7AC5Hy0P rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
   <webp:RDVJYii8k7nCVLN7AC5Hy0P rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
-  <webp:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">S°*[ S°/[ A°sum°m[ R°time_sum°T°m°working° ] ; S°+[ A°sum°m[ R°time_sum°T°m°idle° ] ; A°sum°m[ R°time_sum°T°m°offline° ] ; A°sum°m[ R°time_sum°T°m°working° ] ] ] ; C°100° ]</webp:RFpsbX8Z33MIzQczsjG1Hm>
+  <webp:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">S°*[ S°/[ A°sum°m[ R°time_sum°T°m°working° ] ; S°+[ A°sum°m[ R°time_sum°T°m°idle° ] ; S°+[A°sum°m[ R°time_sum°T°m°offline° ] ; A°sum°m[ R°time_sum°T°m°working° ] ] ] ] ; C°100° ]</webp:RFpsbX8Z33MIzQczsjG1Hm>
   <x_1.1:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI measures the efficiency of time spent on productive work in comparison to the total available time.</x_1.1:description>
   <webp:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">%</webp:RCAkMXcvWVU8mUBbfA8m1BH>
   <webp:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">(sum_M( time_sum(T,m,working)) / ( sum_M(time_sum(T,m,Idle)) + sum_M(time_sum(T,m,offline)) + sum_M(time_sum(T,m,working))) )*100</webp:RCQV99kdEzyvqs86oiS9amD>
