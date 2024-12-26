@@ -29,3 +29,4 @@ wcwidth==0.2.13
 fastapi
 uvicorn
 Levenshtein==0.26.1
+sentence-transformers==3.3.1

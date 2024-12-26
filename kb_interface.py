@@ -8,6 +8,8 @@ import os  # Operating system utilities
 
 import Levenshtein  # Library for calculating Levenshtein distance (string similarity)
 
+from sentence_transformers import SentenceTransformer, util
+
 # === GLOBAL VARIABLES ===
 # Directory for ontology backup files
 MAIN_DIR = pl.Path('./backups')
@@ -29,6 +31,184 @@ DEPENDS_ON = None  # Ontology class for entity dependencies
 OPERATION_CASS = None  # Ontology class for operations
 MACHINE_CASS = None  # Ontology class for machines
 KPI_CLASS = None  # Ontology class for Key Performance Indicators (KPIs)
+
+
+# === Simone Marzeddu - MY UPGRADE FUNCTION DEFINITIONS ===
+def compare_text_similarity(text1, text2):
+    """
+    Compare two strings for general similarity based on their topics or subjects.
+    
+    Parameters:
+    - text1 (str): First text string
+    - text2 (str): Second text string
+    
+    Returns:
+    - float: Cosine similarity score between 0 and 1
+    """
+    # Load a pre-trained sentence embedding model
+    model = SentenceTransformer('all-MiniLM-L6-v2')  # Compact and efficient model
+    
+    # Generate embeddings for both texts
+    embedding1 = model.encode(text1, convert_to_tensor=True)
+    embedding2 = model.encode(text2, convert_to_tensor=True)
+    
+    # Calculate cosine similarity
+    similarity = util.cos_sim(embedding1, embedding2).item()
+    return similarity
+
+def compare_dicts_with_scores(dict1, dict2):
+    """
+    Compare two dictionaries' values key by key and calculate a similarity score.
+
+    Args:
+        dict1 (dict): The first dictionary.
+        dict2 (dict): The second dictionary.
+
+    Returns:
+        dict: A dictionary with keys and a tuple (value1, value2, score).
+              The score is a float between 0 and 1 indicating similarity.
+    """
+    total_score = 0
+    keys = set(dict1.keys()).union(dict2.keys())
+    
+    for key in keys:
+        score = 0
+        val1 = dict1.get(key, None)
+        val2 = dict2.get(key, None)
+
+        print("\nkey: ", key)
+        print("\n\nval1: \n", val1)
+        print("\n\nval2: \n", val2)
+
+        if val1 is None and val2 is None:
+            score = 1
+        elif val1 is None or val2 is None:
+            score = 0
+        elif key == 'depends_on_operation' or key == 'depends_on_machine' or key == 'unit_of_measure':
+            if val1 == val2:
+                score = 1
+            else:
+                score = 0
+        elif key == 'label' or key == 'description':
+            score = _get_similarity(val1, val2, method='levenshtein')
+        elif key == 'depends_on_other_kpi':
+            score = _get_similarity(val1, val2, method='levenshtein')
+
+        total_score += score
+    
+    return total_score
+
+def infer_class_for_instance(attributes):
+    """
+    Infers the most appropriate class for a new instance based on given attributes.
+    
+    :param attributes: Dictionary of attribute-value pairs describing the instance.
+    :return: Suggested class or None if no suitable class is found.
+    """
+    classes_scores = {}
+
+    kpi_subclasses = ONTO.search(label='kpi')[0].subclasses()
+
+    for owl_class in kpi_subclasses:
+        print("examining class: ", owl_class.label.en.first())
+        score = 0
+
+        for instance_label in get_instances(owl_class.label.en.first()):
+            print("instance : ", instance_label)
+
+            instance_attr = get_object_properties(instance_label)
+            score += compare_dicts_with_scores(instance_attr,attributes)
+
+        classes_scores[owl_class] = score
+
+    # Ordina le classi per punteggio decrescente
+    sorted_classes = sorted(classes_scores.items(), key=lambda x: x[1], reverse=True)
+
+    # Ritorna la classe con il punteggio più alto
+    if sorted_classes and sorted_classes[0][1] > 0:
+        return sorted_classes[0][0]
+    else:
+        return None
+
+def add_kpi_upgrade(superclass, label, description, unit_of_measure, parsable_computation_formula, 
+            human_readable_formula=None, depends_on_machine=False, depends_on_operation=False):
+    """
+    Adds a new KPI to the ontology.
+
+    This function validates that the KPI's label and superclass are unique and correctly defined. 
+    It then creates the KPI and associates the provided attributes, formulas, and dependencies.
+
+    Parameters:
+    - superclass (str): The label of the superclass for the KPI.
+    - label (str): The unique label for the KPI.
+    - description (str): A text description of the KPI.
+    - unit_of_measure (str): The measurement unit for the KPI.
+    - parsable_computation_formula (str): A machine-readable formula for the KPI.
+    - human_readable_formula (str, optional): A user-friendly formula (default is the parsable formula).
+    - depends_on_machine (bool, optional): Whether the KPI depends on machines.
+    - depends_on_operation (bool, optional): Whether the KPI depends on operations.
+
+    Returns:
+    - None: Prints errors or creates the KPI instance.
+    """
+    if not human_readable_formula:
+        human_readable_formula = parsable_computation_formula
+    
+    # Validate that the KPI label does not already exist.
+    if ONTO.search(label=label):
+        print('KPI', label, 'ALREADY EXISTS')
+        return
+    
+    # Validate that the superclass is defined and unique.
+    if superclass:
+        target = ONTO.search(label=superclass)
+        if not target or len(target) > 1:
+            print("DOUBLE OR NONE REFERENCED KPI")
+            return
+    else:  
+        depends_on_kpi = []
+        matches = re.findall(r'R°[A-Za-z_]+°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', parsable_computation_formula)  
+        for match in matches:
+            kpi_name = re.match(r'R°([A-Za-z_]+)°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', match).group(1)
+            depends_on_kpi.append(kpi_name)
+
+        attributes = { 'label': label, 
+                        'description': description,
+                        'unit_of_measure': unit_of_measure,
+                        'parsable_computation_formula': parsable_computation_formula,
+                        'depends_on_other_kpi': depends_on_kpi,
+                        'human_readable_formula': human_readable_formula, 
+                        'depends_on_machine': depends_on_machine,
+                        'depends_on_operation': depends_on_operation}
+        prediction = infer_class_for_instance(attributes)
+        print("prediciton: ", prediction)
+        return
+    
+    target = target[0]
+    
+    # Ensure the superclass is valid (either a KPI class or derived from it).
+    if not (KPI_CLASS == target or any(KPI_CLASS in cls.ancestors() for cls in target.is_a)):
+        print("NOT A VALID SUPERCLASS")
+        return
+    
+    # Create the KPI and assign attributes.
+    new_el = target(_generate_hash_code(label))
+    new_el.label = [or2.locstr(label, lang='en')]
+    new_el.description = [or2.locstr(description, lang='en')]
+    UNIT_OF_MEASURE[new_el] = [or2.locstr(unit_of_measure, lang='en')]
+    HUMAN_READABLE_FORMULA[new_el] = [or2.locstr(human_readable_formula, lang='en')]
+    PARSABLE_FORMULA[new_el] = [parsable_computation_formula]
+    
+    # Define dependencies if specified.
+    if depends_on_machine and depends_on_operation:
+        DEPENDS_ON[new_el] = [MACHINE_CASS, OPERATION_CASS]
+    elif depends_on_operation:
+        DEPENDS_ON[new_el] = [OPERATION_CASS]
+    elif depends_on_machine:
+        DEPENDS_ON[new_el] = [MACHINE_CASS]
+    
+    _backup()  # Save changes.
+    print('KPI', label, 'successfully added to the ontology!')
 
 # === FUNCTION DEFINITIONS ===
 
@@ -110,6 +290,8 @@ def _get_similarity(a, b, method='w2v'):
     Returns:
     - similarity (float): A value between 0 and 1 indicating similarity.
     """
+
+
     if method == 'levenshtein':
         # Compute Levenshtein distance
         distance = Levenshtein.distance(a, b)
@@ -564,4 +746,3 @@ def get_closest_object_properties(owl_label, method='levenshtein'):
         return get_object_properties(max_label), max_val
     else:
         return ret, 1  # If the exact match is found, return its properties with a similarity of 1.
-
