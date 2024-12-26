@@ -56,7 +56,7 @@ def compare_text_similarity(text1, text2):
     similarity = util.cos_sim(embedding1, embedding2).item()
     return similarity
 
-def compare_dicts_with_scores(dict1, dict2):
+def compare_attributes_with_scores(dict1, dict2):
     """
     Compare two dictionaries' values key by key and calculate a similarity score.
 
@@ -70,31 +70,73 @@ def compare_dicts_with_scores(dict1, dict2):
     """
     total_score = 0
     keys = set(dict1.keys()).union(dict2.keys())
+    to_remove = ["parsable_computation_formula", 
+                    "human_readable_formula", 
+                    "superclasses",
+                    "depends_on",
+                    "depends_on_operation",
+                    "depends_on_machine",
+                    "entity_type"]
     
-    for key in keys:
+    for key in keys.difference(to_remove):
         score = 0
         val1 = dict1.get(key, None)
         val2 = dict2.get(key, None)
 
         print("\nkey: ", key)
-        print("\n\nval1: \n", val1)
-        print("\n\nval2: \n", val2)
+        print("val1: \n", val1)
+        print("val2: \n", val2)
 
         if val1 is None and val2 is None:
-            score = 1
+            score = 0.1
         elif val1 is None or val2 is None:
             score = 0
-        elif key == 'depends_on_operation' or key == 'depends_on_machine' or key == 'unit_of_measure':
+        elif key == 'unit_of_measure':
             if val1 == val2:
                 score = 1
             else:
                 score = 0
-        elif key == 'label' or key == 'description':
-            score = _get_similarity(val1, val2, method='levenshtein')
+        elif key == 'description' or key == 'label':
+            score = compare_text_similarity(val1, val2)
         elif key == 'depends_on_other_kpi':
-            score = _get_similarity(val1, val2, method='levenshtein')
 
+            kpi_list_a = list(val1)
+            kpi_list_b = list(val2)
+
+            total = 0
+            for item_a in kpi_list_a:
+                total += 1
+                for item_b in kpi_list_b:
+                    if item_a == item_b:
+                        score += 1
+
+            if total > 0:
+                score = score/total
+            else:
+                score = total
+                
+        print(score)
         total_score += score
+
+    
+    # score calculation for machine/operation dependencies
+    a_depend_on_operation = dict1.get("depends_on_operation", None)
+    a_depend_on_machine = dict1.get("depends_on_machine", None)
+
+    b_mo_dependencies = list(dict2.get("depends_on", None))
+    b_depend_on_operation = "operation" in b_mo_dependencies
+    b_depend_on_machine = "machine" in b_mo_dependencies
+    
+    print("\nMACHINE / OPERATION DEPs:")
+    print("a machine ->", a_depend_on_machine)
+    print("b machine ->", b_depend_on_machine)
+    print("a op ->", a_depend_on_operation)
+    print("b op ->", b_depend_on_operation)
+
+    if a_depend_on_machine and b_depend_on_machine:
+        total_score += 0.1
+    if a_depend_on_operation and b_depend_on_operation:
+        total_score += 0.1
     
     return total_score
 
@@ -109,17 +151,23 @@ def infer_class_for_instance(attributes):
 
     kpi_subclasses = ONTO.search(label='kpi')[0].subclasses()
 
-    for owl_class in kpi_subclasses:
-        print("examining class: ", owl_class.label.en.first())
-        score = 0
+    for owl_superclass in kpi_subclasses:
+        for owl_class in owl_superclass.subclasses():
+            print("examining class: ", owl_class.label.en.first())
+            score = 0
+            examined = 0
 
-        for instance_label in get_instances(owl_class.label.en.first()):
-            print("instance : ", instance_label)
+            for instance_label in get_instances(owl_class.label.en.first()):
+                print("instance : ", instance_label)
 
-            instance_attr = get_object_properties(instance_label)
-            score += compare_dicts_with_scores(instance_attr,attributes)
+                instance_attr = get_object_properties(instance_label)
+                score += compare_attributes_with_scores(attributes,instance_attr)
+                examined += 1
 
-        classes_scores[owl_class] = score
+            if examined > 0: 
+                classes_scores[owl_class] = score/examined
+            else:
+                classes_scores[owl_class] = 0
 
     # Ordina le classi per punteggio decrescente
     sorted_classes = sorted(classes_scores.items(), key=lambda x: x[1], reverse=True)
@@ -171,6 +219,7 @@ def add_kpi_upgrade(superclass, label, description, unit_of_measure, parsable_co
         for match in matches:
             kpi_name = re.match(r'R°([A-Za-z_]+)°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', match).group(1)
             depends_on_kpi.append(kpi_name)
+        depends_on_kpi = list(set(depends_on_kpi))
 
         attributes = { 'label': label, 
                         'description': description,
@@ -181,7 +230,7 @@ def add_kpi_upgrade(superclass, label, description, unit_of_measure, parsable_co
                         'depends_on_machine': depends_on_machine,
                         'depends_on_operation': depends_on_operation}
         prediction = infer_class_for_instance(attributes)
-        print("prediciton: ", prediction)
+        print("prediciton: ", prediction.label.en.first())
         return
     
     target = target[0]
@@ -664,7 +713,7 @@ def get_object_properties(owl_label):
                 for match in matches:
                     kpi_name = re.match(r'R°([A-Za-z_]+)°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', match).group(1)
                     depends_on_kpi.append(kpi_name)
-                properties['depends_on_other_kpi'] = depends_on_kpi
+                properties['depends_on_other_kpi'] = list(set(depends_on_kpi))
 
     # Check if the target is a class (ThingClass) and retrieve its superclass and subclass information.
     if isinstance(target, or2.ThingClass):
