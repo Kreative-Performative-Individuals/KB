@@ -8,11 +8,6 @@ import os  # Operating system utilities
 
 import Levenshtein  # Library for calculating Levenshtein distance (string similarity)
 
-from sentence_transformers import SentenceTransformer, util
-
-# === Simone Marzeddu - MY UPGRADE GLOBAL VARIABLES ===
-ALPHA = 0.7
-
 # === GLOBAL VARIABLES ===
 # Directory for ontology backup files
 MAIN_DIR = pl.Path('./backups')
@@ -34,236 +29,6 @@ DEPENDS_ON = None  # Ontology class for entity dependencies
 OPERATION_CASS = None  # Ontology class for operations
 MACHINE_CASS = None  # Ontology class for machines
 KPI_CLASS = None  # Ontology class for Key Performance Indicators (KPIs)
-
-
-# === Simone Marzeddu - MY UPGRADE FUNCTION DEFINITIONS ===
-
-def jaccard_similarity(string1, string2):
-    # Converti le stringhe in insiemi di caratteri
-    set1 = set(string1)
-    set2 = set(string2)
-    
-    # Calcola l'intersezione e l'unione degli insiemi
-    intersection = len(set1.intersection(set2))
-    union = len(set1.union(set2))
-    
-    # Calcola la similarità di Jaccard
-    similarity = intersection / union if union != 0 else 0
-    return similarity
-
-def compare_text_similarity(text1, text2):
-    """
-    Compare two strings for general similarity based on their topics or subjects.
-    
-    Parameters:
-    - text1 (str): First text string
-    - text2 (str): Second text string
-    
-    Returns:
-    - float: Cosine similarity score between 0 and 1
-    """
-    # Load a pre-trained sentence embedding model
-    model = SentenceTransformer('all-MiniLM-L6-v2')  # Compact and efficient model
-    
-    # Generate embeddings for both texts
-    embedding1 = model.encode(text1, convert_to_tensor=True)
-    embedding2 = model.encode(text2, convert_to_tensor=True)
-    
-    # Calculate cosine similarity
-    similarity = util.cos_sim(embedding1, embedding2).item()
-    return similarity
-
-def compare_attributes_with_scores(dict1, dict2):
-    """
-    Compare two dictionaries' values key by key and calculate a similarity score.
-
-    Args:
-        dict1 (dict): The first dictionary.
-        dict2 (dict): The second dictionary.
-
-    Returns:
-        dict: A dictionary with keys and a tuple (value1, value2, score).
-              The score is a float between 0 and 1 indicating similarity.
-    """
-    total_score = 0
-    keys = set(dict1.keys()).union(dict2.keys())
-    to_remove = ["parsable_computation_formula", 
-                    "human_readable_formula", 
-                    "superclasses",
-                    "depends_on",
-                    "depends_on_operation",
-                    "depends_on_machine",
-                    "entity_type"]
-    
-    for key in keys.difference(to_remove):
-        score = 0
-        val1 = dict1.get(key, None)
-        val2 = dict2.get(key, None)
-
-        if val1 is None and val2 is None:
-            score = 0.1
-        elif val1 is None or val2 is None:
-            score = 0
-        elif key == 'unit_of_measure':
-            score = jaccard_similarity(val1,val2)
-        elif key == 'description' or key == 'label':
-            score = compare_text_similarity(val1, val2)
-        elif key == 'depends_on_other_kpi':
-
-            kpi_list_a = list(val1)
-            kpi_list_b = list(val2)
-
-            total = 0
-            for item_a in kpi_list_a:
-                total += 1
-                for item_b in kpi_list_b:
-                    if item_a == item_b:
-                        score += 1
-
-            if total > 0:
-                score = score/total
-            else:
-                score = total
-                
-        total_score += score
-
-    
-    # score calculation for machine/operation dependencies
-    a_depend_on_operation = dict1.get("depends_on_operation", None)
-    a_depend_on_machine = dict1.get("depends_on_machine", None)
-
-    b_mo_dependencies = list(dict2.get("depends_on", None))
-    b_depend_on_operation = "operation" in b_mo_dependencies
-    b_depend_on_machine = "machine" in b_mo_dependencies
-
-    if a_depend_on_machine and b_depend_on_machine:
-        total_score += 0.1
-    if a_depend_on_operation and b_depend_on_operation:
-        total_score += 0.1
-    
-    return total_score
-
-def infer_class_for_instance(attributes):
-    """
-    Infers the most appropriate class for a new instance based on given attributes.
-    
-    :param attributes: Dictionary of attribute-value pairs describing the instance.
-    :return: Suggested class or None if no suitable class is found.
-    """
-    classes_scores = {}
-
-    kpi_subclasses = ONTO.search(label='kpi')[0].subclasses()
-
-    for owl_superclass in kpi_subclasses:
-        for owl_class in owl_superclass.subclasses():
-            score = 0
-            examined = 0
-
-            for instance_label in get_instances(owl_class.label.en.first()):
-
-                instance_attr = get_object_properties(instance_label)
-                score += compare_attributes_with_scores(attributes,instance_attr)
-                examined += 1
-
-            if examined > 0: 
-                classes_scores[owl_class] = score/examined**ALPHA
-            else:
-                classes_scores[owl_class] = 0
-
-    # Ordina le classi per punteggio decrescente
-    sorted_classes = sorted(classes_scores.items(), key=lambda x: x[1], reverse=True)
-
-    for item in sorted_classes:
-        print(item[0].label.en.first(), "  -  ", item[1])
-
-    # Ritorna la classe con il punteggio più alto
-    if sorted_classes and sorted_classes[0][1] > 0:
-        return sorted_classes[0][0]
-    else:
-        return None
-
-def add_kpi_upgrade(superclass, label, description, unit_of_measure, parsable_computation_formula, 
-            human_readable_formula=None, depends_on_machine=False, depends_on_operation=False):
-    """
-    Adds a new KPI to the ontology.
-
-    This function validates that the KPI's label and superclass are unique and correctly defined. 
-    It then creates the KPI and associates the provided attributes, formulas, and dependencies.
-
-    Parameters:
-    - superclass (str): The label of the superclass for the KPI.
-    - label (str): The unique label for the KPI.
-    - description (str): A text description of the KPI.
-    - unit_of_measure (str): The measurement unit for the KPI.
-    - parsable_computation_formula (str): A machine-readable formula for the KPI.
-    - human_readable_formula (str, optional): A user-friendly formula (default is the parsable formula).
-    - depends_on_machine (bool, optional): Whether the KPI depends on machines.
-    - depends_on_operation (bool, optional): Whether the KPI depends on operations.
-
-    Returns:
-    - None: Prints errors or creates the KPI instance.
-    """
-    if not human_readable_formula:
-        human_readable_formula = parsable_computation_formula
-    
-    # Validate that the KPI label does not already exist.
-    if ONTO.search(label=label):
-        print('KPI', label, 'ALREADY EXISTS')
-        return
-    
-    # Validate that the superclass is defined and unique.
-    if superclass:
-        target = ONTO.search(label=superclass)
-        if not target or len(target) > 1:
-            print("DOUBLE OR NONE REFERENCED KPI")
-            return
-    else:  
-        depends_on_kpi = []
-        matches = re.findall(r'R°[A-Za-z_]+°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', parsable_computation_formula)  
-        for match in matches:
-            kpi_name = re.match(r'R°([A-Za-z_]+)°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', match).group(1)
-            depends_on_kpi.append(kpi_name)
-        depends_on_kpi = list(set(depends_on_kpi))
-
-        attributes = { 'label': label, 
-                        'description': description,
-                        'unit_of_measure': unit_of_measure,
-                        'parsable_computation_formula': parsable_computation_formula,
-                        'depends_on_other_kpi': depends_on_kpi,
-                        'human_readable_formula': human_readable_formula, 
-                        'depends_on_machine': depends_on_machine,
-                        'depends_on_operation': depends_on_operation}
-        prediction = infer_class_for_instance(attributes)
-        print("prediciton: ", prediction.label.en.first())
-        return
-    
-    target = target[0]
-    
-    # Ensure the superclass is valid (either a KPI class or derived from it).
-    if not (KPI_CLASS == target or any(KPI_CLASS in cls.ancestors() for cls in target.is_a)):
-        print("NOT A VALID SUPERCLASS")
-        return
-    
-    # Create the KPI and assign attributes.
-    new_el = target(_generate_hash_code(label))
-    new_el.label = [or2.locstr(label, lang='en')]
-    new_el.description = [or2.locstr(description, lang='en')]
-    UNIT_OF_MEASURE[new_el] = [or2.locstr(unit_of_measure, lang='en')]
-    HUMAN_READABLE_FORMULA[new_el] = [or2.locstr(human_readable_formula, lang='en')]
-    PARSABLE_FORMULA[new_el] = [parsable_computation_formula]
-    
-    # Define dependencies if specified.
-    if depends_on_machine and depends_on_operation:
-        DEPENDS_ON[new_el] = [MACHINE_CASS, OPERATION_CASS]
-    elif depends_on_operation:
-        DEPENDS_ON[new_el] = [OPERATION_CASS]
-    elif depends_on_machine:
-        DEPENDS_ON[new_el] = [MACHINE_CASS]
-    
-    _backup()  # Save changes.
-    print('KPI', label, 'successfully added to the ontology!')
-
-
 
 # === FUNCTION DEFINITIONS ===
 
@@ -345,8 +110,6 @@ def _get_similarity(a, b, method='w2v'):
     Returns:
     - similarity (float): A value between 0 and 1 indicating similarity.
     """
-
-
     if method == 'levenshtein':
         # Compute Levenshtein distance
         distance = Levenshtein.distance(a, b)
@@ -719,7 +482,7 @@ def get_object_properties(owl_label):
                 for match in matches:
                     kpi_name = re.match(r'R°([A-Za-z_]+)°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', match).group(1)
                     depends_on_kpi.append(kpi_name)
-                properties['depends_on_other_kpi'] = list(set(depends_on_kpi))
+                properties['depends_on_other_kpi'] = depends_on_kpi
 
     # Check if the target is a class (ThingClass) and retrieve its superclass and subclass information.
     if isinstance(target, or2.ThingClass):
@@ -801,3 +564,4 @@ def get_closest_object_properties(owl_label, method='levenshtein'):
         return get_object_properties(max_label), max_val
     else:
         return ret, 1  # If the exact match is found, return its properties with a similarity of 1.
+
