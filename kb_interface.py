@@ -10,6 +10,9 @@ import Levenshtein  # Library for calculating Levenshtein distance (string simil
 
 from sentence_transformers import SentenceTransformer, util
 
+# === Simone Marzeddu - MY UPGRADE GLOBAL VARIABLES ===
+ALPHA = 0.7
+
 # === GLOBAL VARIABLES ===
 # Directory for ontology backup files
 MAIN_DIR = pl.Path('./backups')
@@ -34,6 +37,20 @@ KPI_CLASS = None  # Ontology class for Key Performance Indicators (KPIs)
 
 
 # === Simone Marzeddu - MY UPGRADE FUNCTION DEFINITIONS ===
+
+def jaccard_similarity(string1, string2):
+    # Converti le stringhe in insiemi di caratteri
+    set1 = set(string1)
+    set2 = set(string2)
+    
+    # Calcola l'intersezione e l'unione degli insiemi
+    intersection = len(set1.intersection(set2))
+    union = len(set1.union(set2))
+    
+    # Calcola la similarità di Jaccard
+    similarity = intersection / union if union != 0 else 0
+    return similarity
+
 def compare_text_similarity(text1, text2):
     """
     Compare two strings for general similarity based on their topics or subjects.
@@ -83,19 +100,12 @@ def compare_attributes_with_scores(dict1, dict2):
         val1 = dict1.get(key, None)
         val2 = dict2.get(key, None)
 
-        print("\nkey: ", key)
-        print("val1: \n", val1)
-        print("val2: \n", val2)
-
         if val1 is None and val2 is None:
             score = 0.1
         elif val1 is None or val2 is None:
             score = 0
         elif key == 'unit_of_measure':
-            if val1 == val2:
-                score = 1
-            else:
-                score = 0
+            score = jaccard_similarity(val1,val2)
         elif key == 'description' or key == 'label':
             score = compare_text_similarity(val1, val2)
         elif key == 'depends_on_other_kpi':
@@ -115,7 +125,6 @@ def compare_attributes_with_scores(dict1, dict2):
             else:
                 score = total
                 
-        print(score)
         total_score += score
 
     
@@ -126,12 +135,6 @@ def compare_attributes_with_scores(dict1, dict2):
     b_mo_dependencies = list(dict2.get("depends_on", None))
     b_depend_on_operation = "operation" in b_mo_dependencies
     b_depend_on_machine = "machine" in b_mo_dependencies
-    
-    print("\nMACHINE / OPERATION DEPs:")
-    print("a machine ->", a_depend_on_machine)
-    print("b machine ->", b_depend_on_machine)
-    print("a op ->", a_depend_on_operation)
-    print("b op ->", b_depend_on_operation)
 
     if a_depend_on_machine and b_depend_on_machine:
         total_score += 0.1
@@ -153,24 +156,25 @@ def infer_class_for_instance(attributes):
 
     for owl_superclass in kpi_subclasses:
         for owl_class in owl_superclass.subclasses():
-            print("examining class: ", owl_class.label.en.first())
             score = 0
             examined = 0
 
             for instance_label in get_instances(owl_class.label.en.first()):
-                print("instance : ", instance_label)
 
                 instance_attr = get_object_properties(instance_label)
                 score += compare_attributes_with_scores(attributes,instance_attr)
                 examined += 1
 
             if examined > 0: 
-                classes_scores[owl_class] = score/examined
+                classes_scores[owl_class] = score/examined**ALPHA
             else:
                 classes_scores[owl_class] = 0
 
     # Ordina le classi per punteggio decrescente
     sorted_classes = sorted(classes_scores.items(), key=lambda x: x[1], reverse=True)
+
+    for item in sorted_classes:
+        print(item[0].label.en.first(), "  -  ", item[1])
 
     # Ritorna la classe con il punteggio più alto
     if sorted_classes and sorted_classes[0][1] > 0:
@@ -258,6 +262,8 @@ def add_kpi_upgrade(superclass, label, description, unit_of_measure, parsable_co
     
     _backup()  # Save changes.
     print('KPI', label, 'successfully added to the ontology!')
+
+
 
 # === FUNCTION DEFINITIONS ===
 
