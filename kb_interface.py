@@ -73,13 +73,14 @@ def compare_text_similarity(text1, text2):
     similarity = util.cos_sim(embedding1, embedding2).item()
     return similarity
 
-def compare_attributes_with_scores(dict1, dict2):
+def compare_attributes_with_scores(dict1, dict2, fast_prediction=False):
     """
     Compare two dictionaries' values key by key and calculate a similarity score.
 
     Args:
         dict1 (dict): The first dictionary.
         dict2 (dict): The second dictionary.
+        fast_prediction (bool, optional): Whether the class prediction should be fast or not, by losing accuracy.
 
     Returns:
         dict: A dictionary with keys and a tuple (value1, value2, score).
@@ -106,7 +107,7 @@ def compare_attributes_with_scores(dict1, dict2):
             score = 0
         elif key == 'unit_of_measure':
             score = jaccard_similarity(val1,val2)
-        elif key == 'description' or key == 'label':
+        elif not fast_prediction and (key == 'description' or key == 'label'):
             score = compare_text_similarity(val1, val2)
         elif key == 'depends_on_other_kpi':
 
@@ -143,15 +144,41 @@ def compare_attributes_with_scores(dict1, dict2):
     
     return total_score
 
-def infer_class_for_instance(attributes):
+def infer_class_for_instance(label, description, unit_of_measure, parsable_computation_formula, 
+            human_readable_formula=None, depends_on_machine=False, depends_on_operation=False, fast_prediction=False):
     """
     Infers the most appropriate class for a new instance based on given attributes.
-    
-    :param attributes: Dictionary of attribute-value pairs describing the instance.
-    :return: Suggested class or None if no suitable class is found.
-    """
-    classes_scores = {}
 
+    Parameters:
+    - label (str): The unique label for the KPI.
+    - description (str): A text description of the KPI.
+    - unit_of_measure (str): The measurement unit for the KPI.
+    - parsable_computation_formula (str): A machine-readable formula for the KPI.
+    - human_readable_formula (str, optional): A user-friendly formula (default is the parsable formula).
+    - depends_on_machine (bool, optional): Whether the KPI depends on machines.
+    - depends_on_operation (bool, optional): Whether the KPI depends on operations.
+    - fast_prediction (bool, optional): Whether the class prediction should be fast or not, by losing accuracy.
+
+    Return: Suggested class or None if no suitable class is found.
+    """
+
+    depends_on_kpi = []
+    matches = re.findall(r'R°[A-Za-z_]+°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', parsable_computation_formula)  
+    for match in matches:
+        kpi_name = re.match(r'R°([A-Za-z_]+)°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', match).group(1)
+        depends_on_kpi.append(kpi_name)
+    depends_on_kpi = list(set(depends_on_kpi))
+
+    attributes = { 'label': label, 
+                    'description': description,
+                    'unit_of_measure': unit_of_measure,
+                    'parsable_computation_formula': parsable_computation_formula,
+                    'depends_on_other_kpi': depends_on_kpi,
+                    'human_readable_formula': human_readable_formula, 
+                    'depends_on_machine': depends_on_machine,
+                    'depends_on_operation': depends_on_operation}
+
+    classes_scores = {}
     kpi_subclasses = ONTO.search(label='kpi')[0].subclasses()
 
     for owl_superclass in kpi_subclasses:
@@ -162,7 +189,7 @@ def infer_class_for_instance(attributes):
             for instance_label in get_instances(owl_class.label.en.first()):
 
                 instance_attr = get_object_properties(instance_label)
-                score += compare_attributes_with_scores(attributes,instance_attr)
+                score += compare_attributes_with_scores(attributes, instance_attr, fast_prediction)
                 examined += 1
 
             if examined > 0: 
@@ -173,22 +200,16 @@ def infer_class_for_instance(attributes):
     # Ordina le classi per punteggio decrescente
     sorted_classes = sorted(classes_scores.items(), key=lambda x: x[1], reverse=True)
 
-    for item in sorted_classes:
-        print(item[0].label.en.first(), "  -  ", item[1])
+    return sorted_classes
 
-    # Ritorna la classe con il punteggio più alto
-    if sorted_classes and sorted_classes[0][1] > 0:
-        return sorted_classes[0][0]
-    else:
-        return None
-
-def add_kpi_upgrade(superclass, label, description, unit_of_measure, parsable_computation_formula, 
-            human_readable_formula=None, depends_on_machine=False, depends_on_operation=False):
+def add_kpi_autoclass(superclass, label, description, unit_of_measure, parsable_computation_formula, 
+            human_readable_formula=None, depends_on_machine=False, depends_on_operation=False, fast_prediction=False):
     """
     Adds a new KPI to the ontology.
 
     This function validates that the KPI's label and superclass are unique and correctly defined. 
     It then creates the KPI and associates the provided attributes, formulas, and dependencies.
+    If no superclass is given, the KPI is associated with the closest found class, by exploiting an attribute matching algorithm.
 
     Parameters:
     - superclass (str): The label of the superclass for the KPI.
@@ -199,6 +220,7 @@ def add_kpi_upgrade(superclass, label, description, unit_of_measure, parsable_co
     - human_readable_formula (str, optional): A user-friendly formula (default is the parsable formula).
     - depends_on_machine (bool, optional): Whether the KPI depends on machines.
     - depends_on_operation (bool, optional): Whether the KPI depends on operations.
+    - fast_prediction (bool, optional): Whether the class prediction should be fast or not, by losing accuracy.
 
     Returns:
     - None: Prints errors or creates the KPI instance.
@@ -211,30 +233,15 @@ def add_kpi_upgrade(superclass, label, description, unit_of_measure, parsable_co
         print('KPI', label, 'ALREADY EXISTS')
         return
     
-    # Validate that the superclass is defined and unique.
-    if superclass:
-        target = ONTO.search(label=superclass)
-        if not target or len(target) > 1:
-            print("DOUBLE OR NONE REFERENCED KPI")
-            return
-    else:  
-        depends_on_kpi = []
-        matches = re.findall(r'R°[A-Za-z_]+°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', parsable_computation_formula)  
-        for match in matches:
-            kpi_name = re.match(r'R°([A-Za-z_]+)°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', match).group(1)
-            depends_on_kpi.append(kpi_name)
-        depends_on_kpi = list(set(depends_on_kpi))
+    if superclass is None:
+        prediction = infer_class_for_instance(label,description, unit_of_measure, parsable_computation_formula, human_readable_formula, depends_on_machine, depends_on_operation, fast_prediction)
+        print("prediciton: ", prediction[0][0].label.en.first())
+        return
 
-        attributes = { 'label': label, 
-                        'description': description,
-                        'unit_of_measure': unit_of_measure,
-                        'parsable_computation_formula': parsable_computation_formula,
-                        'depends_on_other_kpi': depends_on_kpi,
-                        'human_readable_formula': human_readable_formula, 
-                        'depends_on_machine': depends_on_machine,
-                        'depends_on_operation': depends_on_operation}
-        prediction = infer_class_for_instance(attributes)
-        print("prediciton: ", prediction.label.en.first())
+    # Validate that the superclass is defined and unique.
+    target = ONTO.search(label=superclass)
+    if not target or len(target) > 1:
+        print("DOUBLE OR NONE REFERENCED KPI")
         return
     
     target = target[0]
