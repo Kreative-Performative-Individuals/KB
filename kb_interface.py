@@ -73,19 +73,25 @@ def compare_text_similarity(text1, text2):
     similarity = util.cos_sim(embedding1, embedding2).item()
     return similarity
 
-def compare_attributes_with_scores(dict1, dict2, fast_prediction=False):
+def compare_attributes_with_scores(dict1, dict2, weights=None, fast_prediction=False):
     """
-    Compare two dictionaries' values key by key and calculate a similarity score.
+    Compare two KPI dictionaries' values key by key and calculate a similarity score.
 
     Args:
         dict1 (dict): The first dictionary.
         dict2 (dict): The second dictionary.
+        weights (dict, optional): KPI feature weights, to modify the similarity function during KPI class matching.
         fast_prediction (bool, optional): Whether the class prediction should be fast or not, by losing accuracy.
-
     Returns:
         dict: A dictionary with keys and a tuple (value1, value2, score).
               The score is a float between 0 and 1 indicating similarity.
     """
+    # customizable weights:
+
+
+    if weights is None:
+        raise ValueError("no weights where given in input")
+
     total_score = 0
     keys = set(dict1.keys()).union(dict2.keys())
     to_remove = ["parsable_computation_formula", 
@@ -102,13 +108,15 @@ def compare_attributes_with_scores(dict1, dict2, fast_prediction=False):
         val2 = dict2.get(key, None)
 
         if val1 is None and val2 is None:
-            score = 0.1
+            score = weights["both_none_w"]
         elif val1 is None or val2 is None:
             score = 0
         elif key == 'unit_of_measure':
-            score = jaccard_similarity(val1,val2)
-        elif not fast_prediction and (key == 'description' or key == 'label'):
-            score = compare_text_similarity(val1, val2)
+            score = jaccard_similarity(val1,val2) * weights["unit_of_measure_w"]
+        elif not fast_prediction and key == 'description':
+            score = compare_text_similarity(val1, val2) * weights["description_w"]
+        elif not fast_prediction and key == 'label':
+            score = compare_text_similarity(val1, val2) * weights["label_w"]
         elif key == 'depends_on_other_kpi':
 
             kpi_list_a = list(val1)
@@ -125,6 +133,7 @@ def compare_attributes_with_scores(dict1, dict2, fast_prediction=False):
                 score = score/total
             else:
                 score = total
+            score * weights["other_kpi_dependencies_w"]
                 
         total_score += score
 
@@ -138,14 +147,14 @@ def compare_attributes_with_scores(dict1, dict2, fast_prediction=False):
     b_depend_on_machine = "machine" in b_mo_dependencies
 
     if a_depend_on_machine and b_depend_on_machine:
-        total_score += 0.1
+        total_score += weights["machine_dependency_w"]
     if a_depend_on_operation and b_depend_on_operation:
-        total_score += 0.1
+        total_score += weights["operation_dependency_w"]
     
     return total_score
 
 def infer_class_for_instance(label, description, unit_of_measure, parsable_computation_formula, 
-            human_readable_formula=None, depends_on_machine=False, depends_on_operation=False, fast_prediction=False):
+            human_readable_formula=None, depends_on_machine=False, depends_on_operation=False, weights=None, fast_prediction=False):
     """
     Infers the most appropriate class for a new instance based on given attributes.
 
@@ -157,10 +166,26 @@ def infer_class_for_instance(label, description, unit_of_measure, parsable_compu
     - human_readable_formula (str, optional): A user-friendly formula (default is the parsable formula).
     - depends_on_machine (bool, optional): Whether the KPI depends on machines.
     - depends_on_operation (bool, optional): Whether the KPI depends on operations.
+    - weights (dict, optional): KPI feature weights, to modify the similarity function during KPI class matching.
     - fast_prediction (bool, optional): Whether the class prediction should be fast or not, by losing accuracy.
 
     Return: Suggested class or None if no suitable class is found.
     """
+
+    w = {
+    'label_w' : 3,
+    'description_w': 3,
+    'unit_of_measure_w': 1,
+    'both_none_w': 0.1,
+    'other_kpi_dependencies_w': 1,
+    'machine_dependency_w': 0.1,
+    'operation_dependency_w': 0.1
+    }
+
+    if weights:
+        for key in weights:
+            if key in w:
+                w[key] = weights[key]
 
     depends_on_kpi = []
     matches = re.findall(r'R°[A-Za-z_]+°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', parsable_computation_formula)  
@@ -189,7 +214,7 @@ def infer_class_for_instance(label, description, unit_of_measure, parsable_compu
             for instance_label in get_instances(owl_class.label.en.first()):
 
                 instance_attr = get_object_properties(instance_label)
-                score += compare_attributes_with_scores(attributes, instance_attr, fast_prediction)
+                score += compare_attributes_with_scores(attributes, instance_attr, w, fast_prediction)
                 examined += 1
 
             if examined > 0: 
@@ -203,7 +228,7 @@ def infer_class_for_instance(label, description, unit_of_measure, parsable_compu
     return sorted_classes
 
 def add_kpi_autoclass(superclass, label, description, unit_of_measure, parsable_computation_formula, 
-            human_readable_formula=None, depends_on_machine=False, depends_on_operation=False, fast_prediction=False):
+            human_readable_formula=None, depends_on_machine=False, depends_on_operation=False, weights=None, fast_prediction=False):
     """
     Adds a new KPI to the ontology.
 
@@ -220,6 +245,7 @@ def add_kpi_autoclass(superclass, label, description, unit_of_measure, parsable_
     - human_readable_formula (str, optional): A user-friendly formula (default is the parsable formula).
     - depends_on_machine (bool, optional): Whether the KPI depends on machines.
     - depends_on_operation (bool, optional): Whether the KPI depends on operations.
+    - weights (dict, optional): KPI feature weights, to modify the similarity function during KPI class matching.
     - fast_prediction (bool, optional): Whether the class prediction should be fast or not, by losing accuracy.
 
     Returns:
@@ -234,15 +260,16 @@ def add_kpi_autoclass(superclass, label, description, unit_of_measure, parsable_
         return
     
     if superclass is None:
-        prediction = infer_class_for_instance(label,description, unit_of_measure, parsable_computation_formula, human_readable_formula, depends_on_machine, depends_on_operation, fast_prediction)
-        print("prediciton: ", prediction[0][0].label.en.first())
-        return
-
-    # Validate that the superclass is defined and unique.
-    target = ONTO.search(label=superclass)
-    if not target or len(target) > 1:
-        print("DOUBLE OR NONE REFERENCED KPI")
-        return
+        # If no superclass was defined by the user, compute it with the given weights and mode ('fast_prediction' value)
+        prediction = infer_class_for_instance(label,description, unit_of_measure, parsable_computation_formula, human_readable_formula, depends_on_machine, depends_on_operation, weights, fast_prediction)
+        print("class predicted for the KPI: ", prediction[0][0].label.en.first())
+        target = prediction[0]
+    else:
+        # Validate that the superclass is defined and unique.
+        target = ONTO.search(label=superclass)
+        if not target or len(target) > 1:
+            print("DOUBLE OR NONE REFERENCED KPI")
+            return
     
     target = target[0]
     
