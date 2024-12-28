@@ -39,106 +39,106 @@ KPI_CLASS = None  # Ontology class for Key Performance Indicators (KPIs)
 # === Simone Marzeddu - MY UPGRADE FUNCTION DEFINITIONS ===
 
 def jaccard_similarity(string1, string2):
-    # Converti le stringhe in insiemi di caratteri
+    # Convert the input strings into sets of characters
     set1 = set(string1)
     set2 = set(string2)
     
-    # Calcola l'intersezione e l'unione degli insiemi
+    # Calculate the intersection and union of the character sets
     intersection = len(set1.intersection(set2))
     union = len(set1.union(set2))
     
-    # Calcola la similarità di Jaccard
+    # Compute the Jaccard similarity as the ratio of intersection to union
     similarity = intersection / union if union != 0 else 0
     return similarity
 
 def compare_text_similarity(text1, text2):
     """
-    Compare two strings for general similarity based on their topics or subjects.
+    Compare two strings for semantic similarity using a pre-trained sentence embedding model.
     
     Parameters:
-    - text1 (str): First text string
-    - text2 (str): Second text string
+    - text1 (str): First text string.
+    - text2 (str): Second text string.
     
     Returns:
-    - float: Cosine similarity score between 0 and 1
+    - float: Cosine similarity score between 0 and 1.
     """
-    # Load a pre-trained sentence embedding model
-    model = SentenceTransformer('all-MiniLM-L6-v2')  # Compact and efficient model
+    # Load a pre-trained sentence transformer model for embeddings
+    model = SentenceTransformer('all-MiniLM-L6-v2')  # Lightweight and efficient model for embeddings
     
-    # Generate embeddings for both texts
+    # Generate embeddings for both input texts
     embedding1 = model.encode(text1, convert_to_tensor=True)
     embedding2 = model.encode(text2, convert_to_tensor=True)
     
-    # Calculate cosine similarity
+    # Calculate cosine similarity between the two embeddings
     similarity = util.cos_sim(embedding1, embedding2).item()
     return similarity
 
 def compare_attributes_with_scores(dict1, dict2, weights=None, fast_prediction=False):
     """
-    Compare two KPI dictionaries' values key by key and calculate a similarity score.
-
-    Args:
-        dict1 (dict): The first dictionary.
-        dict2 (dict): The second dictionary.
-        weights (dict, optional): KPI feature weights, to modify the similarity function during KPI class matching.
-        fast_prediction (bool, optional): Whether the class prediction should be fast or not, by losing accuracy.
+    Compare two dictionaries representing KPI attributes and compute a similarity score.
+    
+    Parameters:
+    - dict1 (dict): First dictionary of KPI attributes.
+    - dict2 (dict): Second dictionary of KPI attributes.
+    - weights (dict, optional): Weights for different attributes to influence similarity calculation.
+    - fast_prediction (bool, optional): Whether to use a simplified similarity calculation for speed.
+    
     Returns:
-        dict: A dictionary with keys and a tuple (value1, value2, score).
-              The score is a float between 0 and 1 indicating similarity.
+    - dict: A dictionary with attribute keys and corresponding tuples of (value1, value2, score).
     """
-    # customizable weights:
-
-
+    # Ensure weights are provided; otherwise, raise an error
     if weights is None:
-        raise ValueError("no weights where given in input")
-
-    total_score = 0
+        raise ValueError("No weights were provided as input.")
+    
+    total_score = 0 
     keys = set(dict1.keys()).union(dict2.keys())
-    to_remove = ["parsable_computation_formula", 
-                    "human_readable_formula", 
-                    "superclasses",
-                    "depends_on",
-                    "depends_on_operation",
-                    "depends_on_machine",
-                    "entity_type"]
+    
+    # Keys to exclude from the comparison
+    to_remove = [
+        "parsable_computation_formula", 
+        "human_readable_formula", 
+        "superclasses",
+        "depends_on",
+        "depends_on_operation",
+        "depends_on_machine",
+        "entity_type"
+    ]
     
     for key in keys.difference(to_remove):
         score = 0
-        val1 = dict1.get(key, None)
-        val2 = dict2.get(key, None)
+        val1 = dict1.get(key, None)  # Get the value for the attribute in the first dictionary
+        val2 = dict2.get(key, None)  # Get the value for the attribute in the second dictionary
 
+        # Determine the similarity score based on the attribute type
         if val1 is None and val2 is None:
             score = weights["both_none_w"]
         elif val1 is None or val2 is None:
             score = 0
         elif key == 'unit_of_measure':
-            score = jaccard_similarity(val1,val2) * weights["unit_of_measure_w"]
+            score = jaccard_similarity(val1, val2) * weights["unit_of_measure_w"]
         elif not fast_prediction and key == 'description':
             score = compare_text_similarity(val1, val2) * weights["description_w"]
         elif not fast_prediction and key == 'label':
             score = compare_text_similarity(val1, val2) * weights["label_w"]
         elif key == 'depends_on_other_kpi':
-
+            # Handle dependencies on other KPIs
             kpi_list_a = list(val1)
             kpi_list_b = list(val2)
-
             total = 0
             for item_a in kpi_list_a:
                 total += 1
                 for item_b in kpi_list_b:
                     if item_a == item_b:
                         score += 1
-
             if total > 0:
-                score = score/total
+                score = score / total
             else:
                 score = total
-            score * weights["other_kpi_dependencies_w"]
+            score *= weights["other_kpi_dependencies_w"]
                 
         total_score += score
 
-    
-    # score calculation for machine/operation dependencies
+    # Additional scoring for machine and operation dependencies
     a_depend_on_operation = dict1.get("depends_on_operation", None)
     a_depend_on_machine = dict1.get("depends_on_machine", None)
 
@@ -154,55 +154,63 @@ def compare_attributes_with_scores(dict1, dict2, weights=None, fast_prediction=F
     return total_score
 
 def infer_class_for_instance(label, description, unit_of_measure, parsable_computation_formula, 
-            human_readable_formula=None, depends_on_machine=False, depends_on_operation=False, weights=None, fast_prediction=False):
+                             human_readable_formula=None, depends_on_machine=False, 
+                             depends_on_operation=False, weights=None, fast_prediction=False):
     """
-    Infers the most appropriate class for a new instance based on given attributes.
-
+    Infer the most appropriate class for a new KPI instance based on its attributes.
+    
     Parameters:
-    - label (str): The unique label for the KPI.
-    - description (str): A text description of the KPI.
-    - unit_of_measure (str): The measurement unit for the KPI.
-    - parsable_computation_formula (str): A machine-readable formula for the KPI.
-    - human_readable_formula (str, optional): A user-friendly formula (default is the parsable formula).
-    - depends_on_machine (bool, optional): Whether the KPI depends on machines.
-    - depends_on_operation (bool, optional): Whether the KPI depends on operations.
-    - weights (dict, optional): KPI feature weights, to modify the similarity function during KPI class matching.
-    - fast_prediction (bool, optional): Whether the class prediction should be fast or not, by losing accuracy.
-
-    Return: Suggested class or None if no suitable class is found.
+    - label (str): The unique identifier for the KPI.
+    - description (str): Text description of the KPI.
+    - unit_of_measure (str): The unit in which the KPI is measured.
+    - parsable_computation_formula (str): Formula for computation, in machine-readable format.
+    - human_readable_formula (str, optional): A user-friendly representation of the formula.
+    - depends_on_machine (bool, optional): Indicates if the KPI depends on machines.
+    - depends_on_operation (bool, optional): Indicates if the KPI depends on operations.
+    - weights (dict, optional): Weights to influence the similarity calculation.
+    - fast_prediction (bool, optional): Enables a faster but less accurate prediction mode.
+    
+    Returns:
+    - list: A sorted list of classes with scores, in descending order of relevance.
     """
-
+    # Default weights for similarity calculation
     w = {
-    'label_w' : 3,
-    'description_w': 3,
-    'unit_of_measure_w': 1,
-    'both_none_w': 0.1,
-    'other_kpi_dependencies_w': 1,
-    'machine_dependency_w': 0.1,
-    'operation_dependency_w': 0.1
+        'label_w': 3,
+        'description_w': 3,
+        'unit_of_measure_w': 1,
+        'both_none_w': 0.1,
+        'other_kpi_dependencies_w': 1,
+        'machine_dependency_w': 0.1,
+        'operation_dependency_w': 0.1
     }
 
+    # Update weights with user-provided values if available
     if weights:
         for key in weights:
             if key in w:
                 w[key] = weights[key]
 
+    # Parse dependencies on other KPIs from the computation formula
     depends_on_kpi = []
     matches = re.findall(r'R°[A-Za-z_]+°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', parsable_computation_formula)  
     for match in matches:
         kpi_name = re.match(r'R°([A-Za-z_]+)°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', match).group(1)
         depends_on_kpi.append(kpi_name)
-    depends_on_kpi = list(set(depends_on_kpi))
+    depends_on_kpi = list(set(depends_on_kpi))  # Remove duplicates
 
-    attributes = { 'label': label, 
-                    'description': description,
-                    'unit_of_measure': unit_of_measure,
-                    'parsable_computation_formula': parsable_computation_formula,
-                    'depends_on_other_kpi': depends_on_kpi,
-                    'human_readable_formula': human_readable_formula, 
-                    'depends_on_machine': depends_on_machine,
-                    'depends_on_operation': depends_on_operation}
+    # Organize all attributes into a dictionary
+    attributes = {
+        'label': label, 
+        'description': description,
+        'unit_of_measure': unit_of_measure,
+        'parsable_computation_formula': parsable_computation_formula,
+        'depends_on_other_kpi': depends_on_kpi,
+        'human_readable_formula': human_readable_formula, 
+        'depends_on_machine': depends_on_machine,
+        'depends_on_operation': depends_on_operation
+    }
 
+    # Dictionary to store scores for each class
     classes_scores = {}
     kpi_subclasses = ONTO.search(label='kpi')[0].subclasses()
 
@@ -212,17 +220,17 @@ def infer_class_for_instance(label, description, unit_of_measure, parsable_compu
             examined = 0
 
             for instance_label in get_instances(owl_class.label.en.first()):
-
                 instance_attr = get_object_properties(instance_label)
                 score += compare_attributes_with_scores(attributes, instance_attr, w, fast_prediction)
                 examined += 1
 
+            # Calculate average score for the class
             if examined > 0: 
-                classes_scores[owl_class] = score/examined**ALPHA
+                classes_scores[owl_class] = score / examined**ALPHA
             else:
                 classes_scores[owl_class] = 0
 
-    # Ordina le classi per punteggio decrescente
+    # Sort classes by score in descending order
     sorted_classes = sorted(classes_scores.items(), key=lambda x: x[1], reverse=True)
 
     return sorted_classes
