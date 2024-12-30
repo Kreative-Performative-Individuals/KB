@@ -111,20 +111,30 @@ def _generate_hash_code(input_data):
     hash_code = hash_b64_clean[:22]
     return hash_code
 
-def _get_similarity(a, b, method='levenshtein'):
+def _get_similarity(a, b, method='custom'):
     """
     Computes similarity between two strings using a chosen method.
 
     Parameters:
     - a (str): First string to compare.
     - b (str): Second string to compare.
-    - method (str, optional): The method to use, default is 'levenshtein'.
+    - method (str, optional): The method to use, default is 'custom'.
 
     Returns:
     - similarity (float): A value between 0 and 1 indicating similarity.
     """
     if method == 'levenshtein':
         # Compute Levenshtein distance
+        distance = Levenshtein.distance(a, b)
+        # Convert distance to a similarity score
+        similarity = 1 - distance / max(len(a), len(b))
+        return similarity
+    elif method == 'custom':
+        
+        # remove suffix like sum, max, min etc...
+        a = re.sub(r'_(sum|min|max|avg|mean|tot|count|var)$', '', a)
+        b = re.sub(r'_(sum|min|max|avg|mean|tot|count|var)$', '', b)
+        
         distance = Levenshtein.distance(a, b)
         # Convert distance to a similarity score
         similarity = 1 - distance / max(len(a), len(b))
@@ -146,9 +156,9 @@ def _backup():
     - Deletes older backups based on the fine and coarse grain intervals.
     """
     global SAVE_INT
-    coarse_grain = 8  # Defines the coarse-grain interval
-    max_fine_b = 3  # Maximum fine-grain backups to keep
-    max_coarse_b = 2  # Maximum coarse-grain backups to keep
+    coarse_grain = 20  # Defines the coarse-grain interval
+    max_fine_b = 10  # Maximum fine-grain backups to keep
+    max_coarse_b = 5  # Maximum coarse-grain backups to keep
 
     # Save the current ontology
     ONTO.save(file=str(MAIN_DIR / (str(SAVE_INT) + '.owl')), format="rdfxml")
@@ -170,12 +180,11 @@ def _backup():
     
 def _extract_label(lab):
     if isinstance(lab, list):
-        print('lab:', str(lab.first()))
         return str(lab.first())
     else:
-        print('lab:', str(lab))
         return str(lab)
-    
+   
+# TODO: eliminare 
 def _fix():
     for el in get_instances('kpi'):
         target = ONTO.search(label=el)[0]
@@ -240,7 +249,7 @@ def get_formulas(kpi):
     
     return kpi_formula
 
-def get_closest_kpi_formulas(kpi, method='levenshtein'):
+def get_closest_kpi_formulas(kpi, method='custom'):
     """
     Finds the formulas associated with a KPI or the closest matching KPI.
 
@@ -383,6 +392,7 @@ def delete_kpi(label):
 
 
 
+
 def get_instances(owl_class_label):
     """
     Retrieves all instances of a given OWL class.
@@ -429,7 +439,7 @@ def get_instances(owl_class_label):
     # Return the list of instances found.
     return list(instances)
 
-def get_closest_class_instances(owl_class_label, istances_type='a', method='levenshtein'):
+def get_closest_class_instances(owl_class_label, istances_type='a', method='custom'):
     
     """
     Retrieves all instances of a given OWL class or individual. If an exact match is not found, 
@@ -587,7 +597,7 @@ def get_object_properties(owl_label):
 
     return properties
     
-def get_closest_object_properties(owl_label, method='levenshtein'):
+def get_closest_object_properties(owl_label, method='custom'):
     """
     Apply get_object_properties to the entity whose label is the closest match to the given label.
     The closeness is determined by a similarity measure (default is Levenshtein distance).
