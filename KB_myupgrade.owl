@@ -58,6 +58,30 @@
     
 
 
+    <!-- http://webprotege.stanford.edu/R8Mp49g0TDrgmhpIYOynaMC -->
+
+    <owl:ObjectProperty rdf:about="http://webprotege.stanford.edu/R8Mp49g0TDrgmhpIYOynaMC">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:domain rdf:resource="http://webprotege.stanford.edu/R9GEBxXjnC8TCQFoMDMeGDK"/>
+        <rdfs:range rdf:resource="http://webprotege.stanford.edu/RNzrmIzULijr4J9lx0BeVK"/>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This property associates a specific machine-operation pair with a process, making it essential for constructing a meaningful and coherent production workflow.</dc:description>
+        <rdfs:label xml:lang="en">process_step</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://webprotege.stanford.edu/RCaEi4PUrGzSbPJNJGHprCS -->
+
+    <owl:ObjectProperty rdf:about="http://webprotege.stanford.edu/RCaEi4PUrGzSbPJNJGHprCS">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:domain rdf:resource="http://webprotege.stanford.edu/RNzrmIzULijr4J9lx0BeVK"/>
+        <rdfs:range rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">associate a specific operation istance to an istance of machine_operation</dc:description>
+        <rdfs:label xml:lang="en">associated_operation</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
     <!-- http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P -->
 
     <owl:ObjectProperty rdf:about="http://webprotege.stanford.edu/RDVJYii8k7nCVLN7AC5Hy0P">
@@ -70,6 +94,18 @@
     
 
 
+    <!-- http://webprotege.stanford.edu/RDxF1rgCtU3PjzcqjYrE9A6 -->
+
+    <owl:ObjectProperty rdf:about="http://webprotege.stanford.edu/RDxF1rgCtU3PjzcqjYrE9A6">
+        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topObjectProperty"/>
+        <rdfs:domain rdf:resource="http://webprotege.stanford.edu/RNzrmIzULijr4J9lx0BeVK"/>
+        <rdfs:range rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">associate a specific machine istance to an istance of machine_operation</dc:description>
+        <rdfs:label xml:lang="en">associated_machine</rdfs:label>
+    </owl:ObjectProperty>
+    
+
+
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //
@@ -78,32 +114,6 @@
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
-    
-
-
-    <!-- http://webprotege.stanford.edu/R87ctbtlhXVqtM6CFXj1Toj -->
-
-    <owl:DatatypeProperty rdf:about="http://webprotege.stanford.edu/R87ctbtlhXVqtM6CFXj1Toj">
-        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
-        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
-        <rdfs:domain rdf:resource="http://webprotege.stanford.edu/RSHqvDhfo2MwB6oJI7FXOX"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
-        <dc:description xml:lang="en">Whether the KPIs is confidential or not</dc:description>
-        <rdfs:label xml:lang="en">confidential</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://webprotege.stanford.edu/R99shEdH0zI2zMvlgXAI4ef -->
-
-    <owl:DatatypeProperty rdf:about="http://webprotege.stanford.edu/R99shEdH0zI2zMvlgXAI4ef">
-        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
-        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
-        <rdfs:domain rdf:resource="http://webprotege.stanford.edu/RSHqvDhfo2MwB6oJI7FXOX"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
-        <dc:description xml:lang="en">Professional figure responsible for monitoring the KPI</dc:description>
-        <rdfs:label xml:lang="en">responsible</rdfs:label>
-    </owl:DatatypeProperty>
     
 
 
@@ -120,15 +130,15 @@
     
 
 
-    <!-- http://webprotege.stanford.edu/RCCevxxYkfcvieDwA6eT95M -->
+    <!-- http://webprotege.stanford.edu/RB9lIy1CX446La17NyhWRuM -->
 
-    <owl:DatatypeProperty rdf:about="http://webprotege.stanford.edu/RCCevxxYkfcvieDwA6eT95M">
+    <owl:DatatypeProperty rdf:about="http://webprotege.stanford.edu/RB9lIy1CX446La17NyhWRuM">
         <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
         <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
-        <rdfs:domain rdf:resource="http://webprotege.stanford.edu/RSHqvDhfo2MwB6oJI7FXOX"/>
+        <rdfs:domain rdf:resource="http://webprotege.stanford.edu/RNzrmIzULijr4J9lx0BeVK"/>
         <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#int"/>
-        <dc:description xml:lang="en">Value representing the risk indicator of the KPI when it reaches values distant from its desired ones</dc:description>
-        <rdfs:label xml:lang="en">risk_indicator</rdfs:label>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This property indicates the position of a specific step within the overall process sequence, helping to define the order in which operations are carried out.</dc:description>
+        <rdfs:label xml:lang="en">process_step_position</rdfs:label>
     </owl:DatatypeProperty>
     
 
@@ -142,19 +152,6 @@
         <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
         <dc:description xml:lang="en">A unique identifier used to reference an entity within a database system.</dc:description>
         <rdfs:label xml:lang="en">database_id</rdfs:label>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://webprotege.stanford.edu/RDjGh3pOCOgdkhd7rvWYoek -->
-
-    <owl:DatatypeProperty rdf:about="http://webprotege.stanford.edu/RDjGh3pOCOgdkhd7rvWYoek">
-        <rdfs:subPropertyOf rdf:resource="http://www.w3.org/2002/07/owl#topDataProperty"/>
-        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
-        <rdfs:domain rdf:resource="http://webprotege.stanford.edu/RSHqvDhfo2MwB6oJI7FXOX"/>
-        <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
-        <dc:description xml:lang="en">User creator of the KPI definition within the Knowledge Base</dc:description>
-        <rdfs:label xml:lang="en">creator</rdfs:label>
     </owl:DatatypeProperty>
     
 
@@ -280,8 +277,18 @@
 
     <owl:Class rdf:about="http://webprotege.stanford.edu/R93lVNrLbHXfDNaTnEeA4F3">
         <rdfs:subClassOf rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
-        <dc:description xml:lang="en">Generic operations are processes that are common to every type of machine and lack specificity. Instances of this category are in fact the operations Offline, Working and Idle, which can be associated with any existing machine type.</dc:description>
-        <rdfs:label xml:lang="en">generic_operation</rdfs:label>
+        <dc:description xml:lang="en">This class represents operations in the production process that are necessary but do not directly contribute to creating the final product. These operations include tasks like machine setup, maintenance, and other supporting activities that ensure the smooth functioning of the production process. While they do not add to the physical product, they are crucial for maintaining equipment, preparing machines, and ensuring the overall efficiency and effectiveness of the production workflow.</dc:description>
+        <rdfs:label xml:lang="en">non_productive_operation</rdfs:label>
+    </owl:Class>
+    
+
+
+    <!-- http://webprotege.stanford.edu/R9GEBxXjnC8TCQFoMDMeGDK -->
+
+    <owl:Class rdf:about="http://webprotege.stanford.edu/R9GEBxXjnC8TCQFoMDMeGDK">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <dc:description xml:lang="en">This lass represents the necessary procedure for creating a finished product. It includes a sequence of steps, each consisting of pairs of machines and operations. These steps define the actions and machinery required to transform raw materials into a final product. Each machine performs specific operations in the process, ensuring the production follows a structured and efficient sequence to achieve the desired outcome.</dc:description>
+        <rdfs:label xml:lang="en">process</rdfs:label>
     </owl:Class>
     
 
@@ -394,6 +401,16 @@
     
 
 
+    <!-- http://webprotege.stanford.edu/RNzrmIzULijr4J9lx0BeVK -->
+
+    <owl:Class rdf:about="http://webprotege.stanford.edu/RNzrmIzULijr4J9lx0BeVK">
+        <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">The class &quot;MachineOperationPair&quot; represents a pair consisting of a machine and its associated operation within the production process. It links a specific machine with the operation it performs during the manufacturing sequence.</dc:description>
+        <rdfs:label xml:lang="en">machine_operation</rdfs:label>
+    </owl:Class>
+    
+
+
     <!-- http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2 -->
 
     <owl:Class rdf:about="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2">
@@ -426,8 +443,8 @@
 
     <owl:Class rdf:about="http://webprotege.stanford.edu/RfC0vsh9ywZVQhefcJl1HQ">
         <rdfs:subClassOf rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
-        <dc:description xml:lang="en">Although the reference dataset does not contain references to processes or operations, this class is intended to be the main extension point for the application of the software to many and varied business realities. The operations instantiated from this class will be useful for modeling specific and characteristic processes of targeted production pipelines.</dc:description>
-        <rdfs:label xml:lang="en">specific_operation</rdfs:label>
+        <dc:description xml:lang="en">The class &quot;productive_operation&quot; represents operations in the production process that directly contribute to the creation of the final product. These are the core activities that transform raw materials into the finished, sellable item. Productive operations include tasks such as cutting, assembling, molding, or packaging, depending on the type of product being manufactured. Each productive operation plays a key role in progressing the product through various stages, ensuring that it meets the desired specifications and is ready for sale.</dc:description>
+        <rdfs:label xml:lang="en">productive_operation</rdfs:label>
     </owl:Class>
     
 
@@ -558,7 +575,7 @@
         <webprotege:RDVJYii8k7nCVLN7AC5Hy0P rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
         <webprotege:RCQ3gGEWKQ4H0NmKL6zx1i rdf:datatype="http://www.w3.org/2001/XMLSchema#string">average_cycle_time_avg</webprotege:RCQ3gGEWKQ4H0NmKL6zx1i>
         <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°mean°mo[ A°mean°t[ D°average_cycle_time_avg°t°m°o° ]]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
-        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI measures the average time it takes to complete a single machine process (cycle) or task from start to finish</dc:description>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI measures the average time it takes to complete a single machine process or task from start to finish</dc:description>
         <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">s</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
         <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pure KPI</webprotege:RCQV99kdEzyvqs86oiS9amD>
         <rdfs:label xml:lang="en">average_cycle_time_avg</rdfs:label>
@@ -572,7 +589,7 @@
         <rdf:type rdf:resource="http://webprotege.stanford.edu/RC7nojV8LC5fXU4dIzB7Ybd"/>
         <webprotege:R9sK43sWlav85V42nRNKVA4 xml:lang="en">floor_1</webprotege:R9sK43sWlav85V42nRNKVA4>
         <webprotege:RCQ3gGEWKQ4H0NmKL6zx1i rdf:datatype="http://www.w3.org/2001/XMLSchema#string">ast-o8xtn5xa8y87</webprotege:RCQ3gGEWKQ4H0NmKL6zx1i>
-        <rdfs:label xml:lang="en">riveting_machine</rdfs:label>
+        <rdfs:label xml:lang="en">riveting_machine_1</rdfs:label>
     </owl:NamedIndividual>
     
 
@@ -843,7 +860,7 @@
     <!-- http://webprotege.stanford.edu/R9DqQEw5L64dbGHHalwSBpF -->
 
     <owl:NamedIndividual rdf:about="http://webprotege.stanford.edu/R9DqQEw5L64dbGHHalwSBpF">
-        <rdf:type rdf:resource="http://webprotege.stanford.edu/R93lVNrLbHXfDNaTnEeA4F3"/>
+        <rdf:type rdf:resource="http://webprotege.stanford.edu/RfC0vsh9ywZVQhefcJl1HQ"/>
         <dc:description xml:lang="en">The machine is fully operational and actively performing its designated tasks or functions.</dc:description>
         <rdfs:label xml:lang="en">working</rdfs:label>
     </owl:NamedIndividual>
@@ -894,7 +911,7 @@
         <webprotege:RDVJYii8k7nCVLN7AC5Hy0P rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
         <webprotege:RCQ3gGEWKQ4H0NmKL6zx1i rdf:datatype="http://www.w3.org/2001/XMLSchema#string">cycles_max</webprotege:RCQ3gGEWKQ4H0NmKL6zx1i>
         <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°max°mo[ A°max°t[ D°cycles_max°t°m°o° ]]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
-        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI measures the maximum count of completed operational cycles across relevant processes or machinery</dc:description>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI measures the maximum cost of energy used in production, including electricity, gas, fuel, and other energy sources required to run machinery, heating or cooling systems, and auxiliary operations. It is a financial representation of energy efficiency and a vital metric for cost management and sustainability.</dc:description>
         <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">#</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
         <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pure KPI</webprotege:RCQV99kdEzyvqs86oiS9amD>
         <rdfs:label xml:lang="en">cycles_max</rdfs:label>
@@ -1205,7 +1222,7 @@
         <webprotege:RDVJYii8k7nCVLN7AC5Hy0P rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
         <webprotege:RCQ3gGEWKQ4H0NmKL6zx1i rdf:datatype="http://www.w3.org/2001/XMLSchema#string">cycles_min</webprotege:RCQ3gGEWKQ4H0NmKL6zx1i>
         <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°min°mo[ A°min°t[ D°cycles_min°t°m°o° ]]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
-        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI measures the minimum count of completed operational cycles across relevant processes or machinery</dc:description>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI measures the minimum cost of energy used in production, including electricity, gas, fuel, and other energy sources required to run machinery, heating or cooling systems, and auxiliary operations. It is a financial representation of energy efficiency and a vital metric for cost management and sustainability.</dc:description>
         <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">#</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
         <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pure KPI</webprotege:RCQV99kdEzyvqs86oiS9amD>
         <rdfs:label xml:lang="en">cycles_min</rdfs:label>
@@ -1221,7 +1238,7 @@
         <webprotege:RDVJYii8k7nCVLN7AC5Hy0P rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
         <webprotege:RCQ3gGEWKQ4H0NmKL6zx1i rdf:datatype="http://www.w3.org/2001/XMLSchema#string">cycles_avg</webprotege:RCQ3gGEWKQ4H0NmKL6zx1i>
         <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">A°mean°mo[ A°mean°t[ D°cycles_avg°t°m°o° ]]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
-        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI measures the average count of completed operational cycles across relevant processes or machinery</dc:description>
+        <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI measures the average cost of energy used in production, including electricity, gas, fuel, and other energy sources required to run machinery, heating or cooling systems, and auxiliary operations. It is a financial representation of energy efficiency and a vital metric for cost management and sustainability.</dc:description>
         <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">#</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
         <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Pure KPI</webprotege:RCQV99kdEzyvqs86oiS9amD>
         <rdfs:label xml:lang="en">cycles_avg</rdfs:label>
@@ -1361,7 +1378,7 @@
         <rdf:type rdf:resource="http://webprotege.stanford.edu/RCdAgvbgwoVAfJkY8gwIsFz"/>
         <webprotege:RDVJYii8k7nCVLN7AC5Hy0P rdf:resource="http://webprotege.stanford.edu/R9NOqSaVAt7AKU3wXSqEjFr"/>
         <webprotege:RDVJYii8k7nCVLN7AC5Hy0P rdf:resource="http://webprotege.stanford.edu/RS2lMylOEW7gnsTvguXXn2"/>
-        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">S°*[ S°/[ A°sum°m[ R°time_sum°T°m°working° ] ; S°+[ A°sum°m[ R°time_sum°T°m°idle° ] ; S°+[A°sum°m[ R°time_sum°T°m°offline° ] ; A°sum°m[ R°time_sum°T°m°working° ] ] ] ] ; C°100° ]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
+        <webprotege:RFpsbX8Z33MIzQczsjG1Hm rdf:datatype="http://www.w3.org/2001/XMLSchema#string">S°*[ S°/[ A°sum°m[ R°time_sum°T°m°working° ] ; S°+[ A°sum°m[ R°time_sum°T°m°idle° ] ; A°sum°m[ R°time_sum°T°m°offline° ] ; A°sum°m[ R°time_sum°T°m°working° ] ] ] ; C°100° ]</webprotege:RFpsbX8Z33MIzQczsjG1Hm>
         <dc:description rdf:datatype="http://www.w3.org/2001/XMLSchema#string">This KPI measures the efficiency of time spent on productive work in comparison to the total available time.</dc:description>
         <webprotege:RCAkMXcvWVU8mUBbfA8m1BH rdf:datatype="http://www.w3.org/2001/XMLSchema#string">%</webprotege:RCAkMXcvWVU8mUBbfA8m1BH>
         <webprotege:RCQV99kdEzyvqs86oiS9amD rdf:datatype="http://www.w3.org/2001/XMLSchema#string">(sum_M( time_sum(T,m,working)) / ( sum_M(time_sum(T,m,Idle)) + sum_M(time_sum(T,m,offline)) + sum_M(time_sum(T,m,working))) )*100</webprotege:RCQV99kdEzyvqs86oiS9amD>

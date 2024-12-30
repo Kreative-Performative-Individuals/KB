@@ -1,0 +1,18 @@
+1 - ho aggiunto i processi, coppie macchina e operazione e ogni prorietà utile al caso
+2 - migliorato la vecchia implementazione per fare raise eccezioni e non solo stampe
+
+
+DA FARE:
+TEST DELETE KPI
+
+migliorare se possibile vecchie funzioni
+creare la funzione per creare e eliminare processi
+creare funzione per eliminare kpi
+modificare documentazione 
+
+test e showcase per i processi
+
+magari migliorare la similarità
+
+creare report
+creare presentazione

@@ -30,6 +30,11 @@ OPERATION_CASS = None  # Ontology class for operations
 MACHINE_CASS = None  # Ontology class for machines
 KPI_CLASS = None  # Ontology class for Key Performance Indicators (KPIs)
 
+PROCESS_CLASS = None # Ontology class for processes
+MACHINE_OPERATION_CLASS = None # Ontology class for couple machine operation
+ASSOCIATED_MACHINE = None # Ontology property of machine_operation_class
+ASSOCIATED_OPERATION = None # Ontology property of machine_operation_class
+
 # === FUNCTION DEFINITIONS ===
 
 def start(backup_number=1):
@@ -51,7 +56,8 @@ def start(backup_number=1):
     # Declare global variables to ensure they are modified globally
     global SAVE_INT, ONTO, PARSABLE_FORMULA, HUMAN_READABLE_FORMULA
     global UNIT_OF_MEASURE, DEPENDS_ON, OPERATION_CASS, MACHINE_CASS, KPI_CLASS
-
+    global PROCESS_CLASS, MACHINE_OPERATION_CLASS, ASSOCIATED_MACHINE, ASSOCIATED_OPERATION
+    
     if backup_number:
         # Load ontology with the specified backup number
         ONTO = or2.get_ontology(str(MAIN_DIR / (str(backup_number - 1) + '.owl'))).load()
@@ -70,10 +76,17 @@ def start(backup_number=1):
     PARSABLE_FORMULA = ONTO.search(label='parsable_computation_formula')[0]
     HUMAN_READABLE_FORMULA = ONTO.search(label='human_readable_formula')[0]
     UNIT_OF_MEASURE = ONTO.search(label='unit_of_measure')[0]
+    
     DEPENDS_ON = ONTO.search(label='depends_on')[0]
+    
     OPERATION_CASS = ONTO.search(label='operation')[0]
     MACHINE_CASS = ONTO.search(label='machine')[0]
     KPI_CLASS = ONTO.search(label='kpi')[0]
+    
+    PROCESS_CLASS = ONTO.search(label='process')[0]
+    MACHINE_OPERATION_CLASS = ONTO.search(label='machine_operation')[0]
+    ASSOCIATED_MACHINE = ONTO.search(label='associated_machine')[0]
+    ASSOCIATED_OPERATION = ONTO.search(label='associated_operation')[0]
 
     # Print success message
     print("Ontology successfully initialized!")
@@ -98,7 +111,7 @@ def _generate_hash_code(input_data):
     hash_code = hash_b64_clean[:22]
     return hash_code
 
-def _get_similarity(a, b, method='w2v'):
+def _get_similarity(a, b, method='levenshtein'):
     """
     Computes similarity between two strings using a chosen method.
 
@@ -117,9 +130,8 @@ def _get_similarity(a, b, method='w2v'):
         similarity = 1 - distance / max(len(a), len(b))
         return similarity
     else:
-        # Print error if method is not recognized
-        print('METHOD NOT FOUND')
-        return 
+        # raise exception if method is not recognized
+        raise Exception(f'METHOD NOT FOUND: {method}')
 
 def _backup():
     """
@@ -158,8 +170,10 @@ def _backup():
     
 def _extract_label(lab):
     if isinstance(lab, list):
+        print('lab:', str(lab.first()))
         return str(lab.first())
     else:
+        print('lab:', str(lab))
         return str(lab)
     
 def _fix():
@@ -193,15 +207,13 @@ def get_formulas(kpi):
     
     # Ensure exactly one match is found; otherwise, report an error.
     if not target or len(target) > 1:
-        print("DOUBLE OR NONE REFERENCED KPI")
-        return
+        raise Exception(f"DOUBLE OR NONE REFERENCED KPI: {kpi}")
     
     target = target[0]  # Select the first result.
     
     # Verify the target is a KPI.
     if not any(issubclass(cls, KPI_CLASS) for cls in target.is_a):
-        print(kpi,"IS NOT A VALID KPI")
-        return
+        raise Exception(f"IS NOT A VALID KPI: {kpi}")
     
     # Initialize lists for formulas to unroll and store resolved formulas.
     to_unroll = [PARSABLE_FORMULA[target][0]]
@@ -219,8 +231,8 @@ def get_formulas(kpi):
             target = ONTO.search(label=kpi_name)
             
             if not target or len(target) > 1:
-                print("DOUBLE OR NONE REFERENCED KPI")
-                return
+                # this exception is raised only if some formula is wrong
+                raise Exception(f"DOUBLE OR NONE REFERENCED KPI: {kpi_name}")
             
             target = target[0]
             to_unroll.append(PARSABLE_FORMULA[target][0])
@@ -245,14 +257,16 @@ def get_closest_kpi_formulas(kpi, method='levenshtein'):
       - similarity (float): The similarity score (1 for exact matches).
     """
     # Attempt to retrieve the exact formulas for the given KPI.
-    ret = get_formulas(kpi)
-    
-    if not ret:
+    try:
+        ret = get_formulas(kpi)
+        
+        return ret, 1  # Return exact match with similarity score of 1.
+    except:
         # Initialize variables to track the closest match and similarity.
         max_val = -math.inf
         max_label = ''
         
-        # Compare the KPI with all individuals in the ontology.
+        # Compare the KPI with all individuals in the KPI class.
         for ind in KPI_CLASS.instances():
             similarity = _get_similarity(kpi, ind.label.en.first(), method)
             if max_val < similarity:
@@ -261,8 +275,7 @@ def get_closest_kpi_formulas(kpi, method='levenshtein'):
         
         # Return the formulas for the closest matching label.
         return get_formulas(max_label), max_val
-    else:
-        return ret, 1  # Return exact match with similarity score of 1.
+        
 
 
 
@@ -292,22 +305,19 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
     
     # Validate that the KPI label does not already exist.
     if ONTO.search(label=label):
-        print('KPI', label, 'ALREADY EXISTS')
-        return
+        raise Exception(f'KPI ALREADY EXISTS: {label}')
     
     # Validate that the superclass is defined and unique.
     target = ONTO.search(label=superclass)
     if not target or len(target) > 1:
-        print("DOUBLE OR NONE REFERENCED KPI")
-        return
+        raise Exception(f"DOUBLE OR NONE REFERENCED CLASS: {superclass}")
     
     target = target[0]
     
     # Ensure the superclass is valid (either a KPI class or derived from it).
     if not (KPI_CLASS == target or any(KPI_CLASS in cls.ancestors() for cls in target.is_a)):
-        print("NOT A VALID SUPERCLASS")
-        return
-    
+        raise Exception(f"NOT A VALID SUPERCLASS: {superclass}")
+ 
     # Create the KPI and assign attributes.
     new_el = target(_generate_hash_code(label))
     new_el.label = [or2.locstr(label, lang='en')]
@@ -316,16 +326,60 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
     HUMAN_READABLE_FORMULA[new_el] = [or2.locstr(human_readable_formula, lang='en')]
     PARSABLE_FORMULA[new_el] = [parsable_computation_formula]
     
-    # Define dependencies if specified.
-    if depends_on_machine and depends_on_operation:
-        DEPENDS_ON[new_el] = [MACHINE_CASS, OPERATION_CASS]
-    elif depends_on_operation:
-        DEPENDS_ON[new_el] = [OPERATION_CASS]
-    elif depends_on_machine:
-        DEPENDS_ON[new_el] = [MACHINE_CASS]
+    dependencies = []
+    if depends_on_machine:
+        dependencies.append(MACHINE_CASS)
+    if depends_on_operation:
+        dependencies.append(OPERATION_CASS)
+    if dependencies:
+        DEPENDS_ON[new_el] = dependencies
     
     _backup()  # Save changes.
     print('KPI', label, 'successfully added to the ontology!')
+    
+def delete_kpi(label):
+    """
+    Deletes a KPI from the ontology.
+
+    This function checks if the KPI is used in the computation of other KPIs and raises an exception if it is.
+    If the KPI is not used, it deletes the KPI and updates the ontology.
+
+    Parameters:
+    - label (str): The label of the KPI to delete.
+
+    Returns:
+    - None: Prints success message or raises an exception if the KPI is used in other computations.
+    """
+    # Search for the KPI in the ontology.
+    target = ONTO.search(label=label)
+    
+    # Ensure exactly one match is found; otherwise, report an error.
+    if not target or len(target) > 1:
+        raise Exception(f"DOUBLE OR NONE REFERENCED KPI: {label}")
+    
+    target = target[0]  # Select the first result.
+    
+    # Verify the target is a KPI.
+    if not any(issubclass(cls, KPI_CLASS) for cls in target.is_a):
+        raise Exception(f"IS NOT A VALID KPI: {label}")
+    
+    # Check if the KPI is used in the computation of other KPIs.
+    for kpi in KPI_CLASS.instances():
+        if kpi != target:
+            matches = re.findall(r'R°[A-Za-z_]+°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', PARSABLE_FORMULA[kpi][0])
+            for match in matches:
+                kpi_name = re.match(r'R°([A-Za-z_]+)°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', match).group(1)
+                if kpi_name == label:
+                    raise Exception(f"KPI {label} IS USED IN THE COMPUTATION OF {kpi.label[0]}")
+    
+    # Remove the depends_on properties
+    if target in DEPENDS_ON:
+        del DEPENDS_ON[target]
+    # Remove the KPI from the ontology.
+    target.destroy()
+    
+    _backup()  # Save changes.
+    print('KPI', label, 'successfully deleted from the ontology!')
 
 
 
@@ -347,8 +401,8 @@ def get_instances(owl_class_label):
     
     # Validate that the search returned a unique result.
     if not target or len(target) > 1:
-        print("DOUBLE OR NONE REFERENCED KPI")  # Error if none or multiple matches found.
-        return
+        # Error if none or multiple matches found.
+        raise Exception(f"DOUBLE OR NONE REFERENCED ENTITY: {owl_class_label}")
     
     target = target[0]  # Extract the single match.
     instances = set()  # Initialize a set to store the instances.
@@ -370,18 +424,26 @@ def get_instances(owl_class_label):
         instances.add(owl_class_label)
     else:
         # If the input is neither a class nor an individual, print an error message.
-        print("INPUT IS NEITHER A CLASS NOR AN INSTANCE")
+        raise Exception(f"INPUT IS NEITHER A CLASS NOR AN INSTANCE: {owl_class_label}")
     
     # Return the list of instances found.
     return list(instances)
 
-def get_closest_class_instances(owl_class_label, method='levenshtein'):
+def get_closest_class_instances(owl_class_label, istances_type='a', method='levenshtein'):
+    
     """
-    Retrieves all instances of a given OWL class or individual, if not exact match is found search for the
-    most similar element in the KB.
+    Retrieves all instances of a given OWL class or individual. If an exact match is not found, 
+    searches for the most similar element in the knowledge base (KB).
 
     Parameters:
     - owl_class_label (str): The label of the class or individual to search for.
+    - istances_type (str): The type of instances to return (default is 'a' for all). 
+      Options are:
+        - 'k' for KPI
+        - 'm' for machine
+        - 'o' for operation
+        - 'p' for process
+        - 'a' for all
     - method (str): The similarity method (default is 'levenshtein').
 
     Returns:
@@ -390,36 +452,58 @@ def get_closest_class_instances(owl_class_label, method='levenshtein'):
       - float: The similarity score of the closest match.
     """
     # Attempt to retrieve the instances of the exact class or individual.
-    ret = get_instances(owl_class_label)
-    
-    # If no instances are found, look for the closest match.
-    if not ret:
-        max_val = -math.inf  # Initialize the highest similarity score.
-        max_label = ''  # Initialize the label of the closest match.
+    try:
+        ret = get_instances(owl_class_label)
         
-        # Iterate over all classes in the ontology.
-        for ind in ONTO.classes():
-            # Compute the similarity between the input and the current class label.
-            similarity = _get_similarity(owl_class_label, ind.label.en.first(), method)
-            # Update the closest match if the similarity is higher.
-            if max_val < similarity:
-                max_val = similarity
-                max_label = ind.label.en.first()
-        
-        # Iterate over all individuals in the ontology.
-        for ind in ONTO.individuals():
-            # Compute the similarity between the input and the current individual label.
-            similarity = _get_similarity(owl_class_label, ind.label.en.first(), method)
-            # Update the closest match if the similarity is higher.
-            if max_val < similarity:
-                max_val = similarity
-                max_label = ind.label.en.first()
-        
-        # Retrieve the instances of the closest matching label and return them.
-        return get_instances(max_label), max_val
-    else:
         # If exact match is found, return the instances with similarity score of 1.
         return ret, 1
+    
+    except Exception:
+    # If no instances are found, look for the closest match.
+        max_val = -math.inf  # Initialize the highest similarity score.
+        max_label = ''  # Initialize the label of the closest match.
+
+
+        if istances_type == 'a':
+            # not machine_operation because are subordinated to process
+            class_to_check = [KPI_CLASS, MACHINE_CASS, OPERATION_CASS, PROCESS_CLASS]
+            instaces_to_check = list(KPI_CLASS.instances()) + list(MACHINE_CASS.instances()) + \
+                        list(OPERATION_CASS.instances()) + list(PROCESS_CLASS.instances())
+        elif istances_type == 'k':
+            class_to_check = [KPI_CLASS]
+            instaces_to_check = list(KPI_CLASS.instances())
+        elif istances_type == 'm':
+            class_to_check = [MACHINE_CASS]
+            instaces_to_check = list(MACHINE_CASS.instances())
+        elif istances_type == 'o':
+            class_to_check = [OPERATION_CASS]
+            instaces_to_check = list(OPERATION_CASS.instances())
+        elif istances_type == 'p':
+            class_to_check = [PROCESS_CLASS]
+            instaces_to_check = list(PROCESS_CLASS.instances())
+        
+        # Iterate over all classes in class_to_check.
+        for cl in class_to_check:
+            # Compute the similarity between the input and the current class label.
+            similarity = _get_similarity(owl_class_label, _extract_label(cl.label), method)
+            # Update the closest match if the similarity is higher.
+            if max_val < similarity:
+                max_val = similarity
+                max_label = _extract_label(cl.label)
+        
+        # Iterate over all istances in instaces_to_check.
+        for ind in instaces_to_check:
+            # Compute the similarity between the input and the current individual label.
+            similarity = _get_similarity(owl_class_label, _extract_label(ind.label), method)
+            # Update the closest match if the similarity is higher.
+            if max_val < similarity:
+                max_val = similarity
+                max_label = _extract_label(ind.label)
+        
+        # Retrieve the instances of the closest matching label and return them.
+        print(max_label)
+        return get_instances(max_label), max_val
+        
 
 
 
@@ -447,8 +531,7 @@ def get_object_properties(owl_label):
     target = ONTO.search(label=owl_label)
     
     if not target or len(target) > 1:
-        print("DOUBLE OR NONE REFERENCED KPI")
-        return
+        raise Exception(f"DOUBLE OR NONE REFERENCED KPI: {owl_label}")
     
     target = target[0]  # Extract the single matching element.
     
@@ -519,9 +602,12 @@ def get_closest_object_properties(owl_label, method='levenshtein'):
             - float: The similarity score (between 0 and 1) of the closest match.
     """
     # Attempt to retrieve properties for the exact match of the owl_label.
-    ret = get_object_properties(owl_label)
+    try:
+        ret = get_object_properties(owl_label)
+        
+        return ret, 1  # If the exact match is found, return its properties with a similarity of 1.
     
-    if not ret:
+    except Exception:
         max_val = -math.inf  # Initialize a variable to track the maximum similarity score.
         max_label = ''  # Initialize a variable to store the label of the closest match.
 
@@ -562,6 +648,5 @@ def get_closest_object_properties(owl_label, method='levenshtein'):
 
         # Return the properties of the closest match along with the similarity score.
         return get_object_properties(max_label), max_val
-    else:
-        return ret, 1  # If the exact match is found, return its properties with a similarity of 1.
+        
 
