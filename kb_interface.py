@@ -26,7 +26,7 @@ PARSABLE_FORMULA = None  # Ontology class for parsable computation formulas
 HUMAN_READABLE_FORMULA = None  # Ontology class for human-readable formulas
 UNIT_OF_MEASURE = None  # Ontology class for units of measurement
 DEPENDS_ON = None  # Ontology class for entity dependencies
-OPERATION_CASS = None  # Ontology class for operations
+OPERATION_CLASS = None  # Ontology class for operations
 MACHINE_CASS = None  # Ontology class for machines
 KPI_CLASS = None  # Ontology class for Key Performance Indicators (KPIs)
 
@@ -34,6 +34,8 @@ PROCESS_CLASS = None # Ontology class for processes
 MACHINE_OPERATION_CLASS = None # Ontology class for couple machine operation
 ASSOCIATED_MACHINE = None # Ontology property of machine_operation_class
 ASSOCIATED_OPERATION = None # Ontology property of machine_operation_class
+PROCESS_STEP_POSITION = None # Ontology property of machine_operation_class
+PROCESS_STEP = None # Ontology property of process
 
 # === FUNCTION DEFINITIONS ===
 
@@ -55,8 +57,8 @@ def start(backup_number=1):
     """
     # Declare global variables to ensure they are modified globally
     global SAVE_INT, ONTO, PARSABLE_FORMULA, HUMAN_READABLE_FORMULA
-    global UNIT_OF_MEASURE, DEPENDS_ON, OPERATION_CASS, MACHINE_CASS, KPI_CLASS
-    global PROCESS_CLASS, MACHINE_OPERATION_CLASS, ASSOCIATED_MACHINE, ASSOCIATED_OPERATION
+    global UNIT_OF_MEASURE, DEPENDS_ON, OPERATION_CLASS, MACHINE_CASS, KPI_CLASS
+    global PROCESS_CLASS, MACHINE_OPERATION_CLASS, ASSOCIATED_MACHINE, ASSOCIATED_OPERATION, PROCESS_STEP_POSITION, PROCESS_STEP
     
     if backup_number:
         # Load ontology with the specified backup number
@@ -79,7 +81,7 @@ def start(backup_number=1):
     
     DEPENDS_ON = ONTO.search(label='depends_on')[0]
     
-    OPERATION_CASS = ONTO.search(label='operation')[0]
+    OPERATION_CLASS = ONTO.search(label='operation')[0]
     MACHINE_CASS = ONTO.search(label='machine')[0]
     KPI_CLASS = ONTO.search(label='kpi')[0]
     
@@ -87,7 +89,9 @@ def start(backup_number=1):
     MACHINE_OPERATION_CLASS = ONTO.search(label='machine_operation')[0]
     ASSOCIATED_MACHINE = ONTO.search(label='associated_machine')[0]
     ASSOCIATED_OPERATION = ONTO.search(label='associated_operation')[0]
-
+    PROCESS_STEP_POSITION = ONTO.search(label='process_step_position')[0]
+    PROCESS_STEP = ONTO.search(label='process_step')[0]
+    
     # Print success message
     print("Ontology successfully initialized!")
 
@@ -129,16 +133,59 @@ def _get_similarity(a, b, method='custom'):
         # Convert distance to a similarity score
         similarity = 1 - distance / max(len(a), len(b))
         return similarity
+    
     elif method == 'custom':
+        # Define suffixes to be treated separately
+        deleted_suffixes = ['sum', 'min', 'max', 'avg', 'mean', 'tot', 'count', 'var']
         
-        # remove suffix like sum, max, min etc...
-        a = re.sub(r'_(sum|min|max|avg|mean|tot|count|var)$', '', a)
-        b = re.sub(r'_(sum|min|max|avg|mean|tot|count|var)$', '', b)
+        # Separate main parts and suffixes
+        a_main_part = a
+        b_main_part = b
+        a_suffix = None
+        b_suffix = None
         
-        distance = Levenshtein.distance(a, b)
-        # Convert distance to a similarity score
-        similarity = 1 - distance / max(len(a), len(b))
-        return similarity
+        # Check and capture the deleted suffix from both strings
+        for suffix in deleted_suffixes:
+            if a.endswith(f"_{suffix}"):
+                a_suffix = suffix
+                a_main_part = a[:-(len(suffix) + 1)]  # Remove the suffix
+                break
+        for suffix in deleted_suffixes:      
+            if b.endswith(f"_{suffix}"):
+                b_suffix = suffix
+                b_main_part = b[:-(len(suffix) + 1)]  # Remove the suffix
+                break
+        
+        # Remove spaces and underscores from the main part and suffix
+        a_main_part = a_main_part.replace("_", "").replace(" ", "")
+        b_main_part = b_main_part.replace("_", "").replace(" ", "")
+        
+        # Handle cases where the main parts are empty
+        if not a_main_part or not b_main_part:
+            main_similarity = 0  # Treat empty main parts as having no similarity
+        else:
+            # Compute Levenshtein distance for the main parts (first parts of the strings)
+            main_distance = Levenshtein.distance(a_main_part, b_main_part)
+            main_similarity = 1 - main_distance / max(len(a_main_part), len(b_main_part))
+
+        # Handle cases where the suffixes are empty
+        if not a_suffix and not b_suffix:
+            suffix_similarity = 1  # Both strings have no suffix, so they are identical
+        elif a_suffix and b_suffix:
+            # Compute Levenshtein distance for the suffixes (second parts of the strings)
+            suffix_distance = Levenshtein.distance(a_suffix, b_suffix)
+            suffix_similarity = 1 - suffix_distance / max(len(a_suffix), len(b_suffix))
+        elif b_suffix is 'sum':
+            # If only one string has a suffix, we treat it as completely different
+            suffix_similarity = 1e-08
+        else:
+            suffix_similarity = 0
+            
+        # Assign higher weight to the main part and lower weight to the suffix part
+        total_similarity = (0.85 * main_similarity) + (0.15 * suffix_similarity)
+
+        return total_similarity
+    
     else:
         # raise exception if method is not recognized
         raise Exception(f'METHOD NOT FOUND: {method}')
@@ -189,9 +236,9 @@ def _fix():
     for el in get_instances('kpi'):
         target = ONTO.search(label=el)[0]
         if el in ['energy_efficiency', 'non_operative_time', 'operative_consumption', 'total_consumption', 'total_energy_cost']:
-            DEPENDS_ON[target] = [OPERATION_CASS]
+            DEPENDS_ON[target] = [OPERATION_CLASS]
         else:
-            DEPENDS_ON[target] = [MACHINE_CASS, OPERATION_CASS]
+            DEPENDS_ON[target] = [MACHINE_CASS, OPERATION_CLASS]
 
     ONTO.save(file='./new_onto_test.owl', format="rdfxml")
 
@@ -339,7 +386,7 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
     if depends_on_machine:
         dependencies.append(MACHINE_CASS)
     if depends_on_operation:
-        dependencies.append(OPERATION_CASS)
+        dependencies.append(OPERATION_CLASS)
     if dependencies:
         DEPENDS_ON[new_el] = dependencies
     
@@ -369,7 +416,7 @@ def delete_kpi(label):
     target = target[0]  # Select the first result.
     
     # Verify the target is a KPI.
-    if not any(issubclass(cls, KPI_CLASS) for cls in target.is_a):
+    if not isinstance(target, KPI_CLASS):
         raise Exception(f"IS NOT A VALID KPI: {label}")
     
     # Check if the KPI is used in the computation of other KPIs.
@@ -379,18 +426,186 @@ def delete_kpi(label):
             for match in matches:
                 kpi_name = re.match(r'R°([A-Za-z_]+)°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', match).group(1)
                 if kpi_name == label:
-                    raise Exception(f"KPI {label} IS USED IN THE COMPUTATION OF {kpi.label[0]}")
+                    raise Exception(f"KPI {label} IS USED IN THE COMPUTATION OF {_extract_label(kpi.label)}")
     
-    # Remove the depends_on properties
-    if target in DEPENDS_ON:
-        del DEPENDS_ON[target]
     # Remove the KPI from the ontology.
-    target.destroy()
+    or2.destroy_entity(target)
+    print(DEPENDS_ON[target])
     
     _backup()  # Save changes.
     print('KPI', label, 'successfully deleted from the ontology!')
 
 
+
+def add_process(process_label, process_description, steps_list):
+    """
+    Adds a new process to the ontology with the given label, description, and steps.
+    
+    Args:
+        process_label (str): The label for the new process.
+        process_description (str): A description of the new process.
+        steps_list (list of tuples): A list of tuples where each tuple contains a machine label and an operation label.
+    Raises:
+        Exception: If a process with the same label already exists.
+        Exception: If a machine or operation in the steps list is not found or if there are multiple matches.
+        Exception: If a machine or operation in the steps list is not of the correct type.
+    Returns:
+        None
+    """
+    
+    # request validation
+    
+    # Ensure exactly no match is found
+    if ONTO.search(label=process_label):
+        raise Exception(f"LABEL ALREADY PRESENT: {process_label}")
+    
+    entity_pairs = []
+    for m, o in steps_list:
+        # Search for the machine in the ontology.
+        m_target = ONTO.search(label=m)
+        # Ensure exactly one match is found; otherwise, report an error.
+        if not m_target or len(m_target) > 1:
+            raise Exception(f"DOUBLE OR NONE REFERENCED MACHINE: {m}")
+        m_target = m_target[0]  # Select the first result.
+        # Verify the target is a machine.
+        if not isinstance(m_target, MACHINE_CASS):
+            raise Exception(f"IS NOT A VALID MACHINE: {m}")
+        
+        # Search for the operation in the ontology.
+        o_target = ONTO.search(label=o)   
+        # Ensure exactly one match is found; otherwise, report an error.
+        if not o_target or len(o_target) > 1:
+            raise Exception(f"DOUBLE OR NONE REFERENCED OPERATION: {o}")   
+        o_target = o_target[0]  # Select the first result.
+        # Verify the target is an operation.
+        if not isinstance(o_target, OPERATION_CLASS):
+            raise Exception(f"IS NOT A VALID OPERATION: {o}")
+        
+        entity_pairs.append((m_target, o_target))
+    
+    # creating the process
+    steps = []
+    for i, (m, o) in enumerate(steps_list):
+        new_el_label = process_label + '_' + str(i + 1) + '_' + m + '_' + o
+        new_el = MACHINE_OPERATION_CLASS(_generate_hash_code(new_el_label))
+        steps.append(new_el)
+        
+        new_el.label = [or2.locstr(new_el_label, lang='en')]
+        new_el.description = [or2.locstr(f'step {i + 1} of the process {process_label}', lang='en')]
+        
+        ASSOCIATED_MACHINE[new_el] = [entity_pairs[i][0]]
+        ASSOCIATED_OPERATION[new_el] = [entity_pairs[i][1]]
+        PROCESS_STEP_POSITION[new_el] = [i + 1]
+
+    new_process = PROCESS_CLASS(_generate_hash_code(process_label))
+    new_process.label = [or2.locstr(process_label, lang='en')]
+    new_process.description = [or2.locstr(process_description, lang='en')]
+    PROCESS_STEP[new_process] = steps
+            
+def delete_process(process_label):
+    """
+    Deletes a process from the ontology.
+
+    Parameters:
+    - process_label (str): The label of the process to delete.
+
+    Returns:
+    - None: Prints a success message or raises an exception if the process is referenced elsewhere.
+    """
+    # Search for the process in the ontology.
+    target = ONTO.search(label=process_label)
+    
+    # Ensure exactly one match is found; otherwise, report an error.
+    if not target or len(target) > 1:
+        raise Exception(f"DOUBLE OR NONE REFERENCED PROCESS: {process_label}")
+    
+    target = target[0]  # Select the first result.
+    
+    # Verify the target is a process.
+    if not isinstance(target, PROCESS_CLASS):
+        raise Exception(f"IS NOT A VALID PROCESS: {process_label}")
+
+    
+    # Remove all process steps associated with this process.
+    steps = PROCESS_STEP[target]
+    for step in steps:
+        or2.destroy_entity(step)
+    
+    # Remove the process itself.
+    or2.destroy_entity(target)
+    
+    # Save changes to the ontology.
+    _backup()
+    print('PROCESS', process_label, 'successfully deleted from the ontology!')
+
+
+
+def add_operation(label, description):
+    """
+    Adds a new operation to the ontology.
+
+    This function validates that the operation's label is unique and correctly defined.
+    It then creates the operation and associates the provided label and description.
+
+    Parameters:
+    - label (str): The unique label for the operation.
+    - description (str): A text description of the operation.
+
+    Returns:
+    - None: Prints errors or creates the operation instance.
+    """
+    # Validate that the operation label does not already exist.
+    if ONTO.search(label=label):
+        raise Exception(f'OPERATION ALREADY EXISTS: {label}')
+    
+    # Create the operation and assign attributes.
+    new_el = OPERATION_CLASS(_generate_hash_code(label))
+    new_el.label = [or2.locstr(label, lang='en')]
+    new_el.description = [or2.locstr(description, lang='en')]
+    
+    # Optionally, if you need any additional associations or attributes, they can be added here
+    
+    _backup()  # Save changes.
+    print('Operation', label, 'successfully added to the ontology!')
+
+def delete_operation(label):
+    """
+    Deletes an operation from the ontology.
+
+    This function checks if the operation is used in the computation of any KPIs and raises an exception if it is.
+    If the operation is not used, it deletes the operation and updates the ontology.
+
+    Parameters:
+    - label (str): The label of the operation to delete.
+
+    Returns:
+    - None: Prints success message or raises an exception if the operation is used in computations.
+    """
+    # Search for the operation in the ontology.
+    target = ONTO.search(label=label)
+    
+    # Ensure exactly one match is found; otherwise, report an error.
+    if not target or len(target) > 1:
+        raise Exception(f"DOUBLE OR NONE REFERENCED OPERATION: {label}")
+    
+    target = target[0]  # Select the first result.
+    
+    # Verify the target is an operation.
+    if not isinstance(target, OPERATION_CLASS):
+        raise Exception(f"IS NOT A VALID OPERATION: {label}")
+    
+    # Check if the KPI is used in the computation of other KPIs.
+    for mo in MACHINE_OPERATION_CLASS.instances():
+        if target in ASSOCIATED_OPERATION[mo]:
+            raise Exception(f"OPERATION {label} IS USED IN THE PROCESS_STEP {_extract_label(mo.label)}")
+                
+    # Remove the operation from the ontology.
+    or2.destroy_entity(target)
+    print(f"Operation {label} successfully deleted from the ontology!")
+    
+    _backup()  # Save changes.
+    print('OPERATION', label, 'successfully deleted from the ontology!')
+    
 
 
 def get_instances(owl_class_label):
@@ -476,9 +691,9 @@ def get_closest_class_instances(owl_class_label, istances_type='a', method='cust
 
         if istances_type == 'a':
             # not machine_operation because are subordinated to process
-            class_to_check = [KPI_CLASS, MACHINE_CASS, OPERATION_CASS, PROCESS_CLASS]
+            class_to_check = [KPI_CLASS, MACHINE_CASS, OPERATION_CLASS, PROCESS_CLASS]
             instaces_to_check = list(KPI_CLASS.instances()) + list(MACHINE_CASS.instances()) + \
-                        list(OPERATION_CASS.instances()) + list(PROCESS_CLASS.instances())
+                        list(OPERATION_CLASS.instances()) + list(PROCESS_CLASS.instances())
         elif istances_type == 'k':
             class_to_check = [KPI_CLASS]
             instaces_to_check = list(KPI_CLASS.instances())
@@ -486,8 +701,8 @@ def get_closest_class_instances(owl_class_label, istances_type='a', method='cust
             class_to_check = [MACHINE_CASS]
             instaces_to_check = list(MACHINE_CASS.instances())
         elif istances_type == 'o':
-            class_to_check = [OPERATION_CASS]
-            instaces_to_check = list(OPERATION_CASS.instances())
+            class_to_check = [OPERATION_CLASS]
+            instaces_to_check = list(OPERATION_CLASS.instances())
         elif istances_type == 'p':
             class_to_check = [PROCESS_CLASS]
             instaces_to_check = list(PROCESS_CLASS.instances())
