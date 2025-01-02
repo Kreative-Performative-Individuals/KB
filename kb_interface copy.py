@@ -44,40 +44,48 @@ def start(backup_number=1):
     Initialize the Ontology and Global Variables
     -----------------------------
     
+    
     This function loads an ontology from a specified backup number or defaults to the latest save interval.
     It also assigns specific ontology classes and related data structures to global variables, making them available for further processing and operations.
 
     -----------------------------
     Args:
     -----------------------------
-    - backup_number (int, optional): 
-        The backup number to load the ontology from. Defaults to 1 if not provided.
+        backup_number (int, optional): 
+            The backup number to load the ontology from. Defaults to 1 if not provided.
+
+    -----------------------------
+    Raises:
+    -----------------------------
+        IndexError: 
+            If the search for any ontology class by label results in an empty list, 
+            indicating that the class could not be found.
 
     -----------------------------
     Side Effects:
     -----------------------------
-    Modifies the following global variables:
-        SAVE_INT: The save interval setting.
-        ONTO: The main ontology object.
-        PARSABLE_FORMULA: The class containing machine-readable formulas for KPIs.
-        HUMAN_READABLE_FORMULA: The class containing user-friendly formulas for KPIs.
-        UNIT_OF_MEASURE: The class mapping KPIs to their respective units of measure.
-        DEPENDS_ON: The class indicating dependencies between KPIs and other entities.
-        OPERATION_CLASS: The class representing operations in the ontology.
-        MACHINE_CASS: The class representing machines in the ontology.
-        KPI_CLASS: The class representing KPIs in the ontology.
-        PROCESS_CLASS: The class representing processes in the ontology.
-        MACHINE_OPERATION_CLASS: The class representing machine operations in the ontology.
-        ASSOCIATED_MACHINE: The class linking machine operations to specific machines.
-        ASSOCIATED_OPERATION: The class linking machine operations to specific operations.
-        PROCESS_STEP_POSITION: The class mapping process steps to their order in a process.
-        PROCESS_STEP: The class mapping processes to their respective steps.
+        Modifies the following global variables:
+            - SAVE_INT: The save interval setting.
+            - ONTO: The main ontology object.
+            - PARSABLE_FORMULA: A dictionary containing machine-readable formulas for KPIs.
+            - HUMAN_READABLE_FORMULA: A dictionary containing user-friendly formulas for KPIs.
+            - UNIT_OF_MEASURE: A dictionary mapping KPIs to their respective units of measure.
+            - DEPENDS_ON: A dictionary indicating dependencies between KPIs and other entities.
+            - OPERATION_CLASS: The class representing operations in the ontology.
+            - MACHINE_CASS: The class representing machines in the ontology.
+            - KPI_CLASS: The class representing KPIs in the ontology.
+            - PROCESS_CLASS: The class representing processes in the ontology.
+            - MACHINE_OPERATION_CLASS: The class representing machine operations in the ontology.
+            - ASSOCIATED_MACHINE: A dictionary linking machine operations to specific machines.
+            - ASSOCIATED_OPERATION: A dictionary linking machine operations to specific operations.
+            - PROCESS_STEP_POSITION: A dictionary mapping process steps to their order in a process.
+            - PROCESS_STEP: A dictionary mapping processes to their respective steps.
 
     -----------------------------
     Prints:
     -----------------------------
-    "Ontology successfully initialized!" 
-        upon successful initialization of the ontology and global variables.
+        "Ontology successfully initialized!" 
+            upon successful initialization of the ontology and global variables.
     """
 
 
@@ -124,23 +132,23 @@ def start(backup_number=1):
 
 def _generate_hash_code(input_data):
     """
-    Generate a Truncated, URL-safe Base64 Encoded SHA-256 Hash
-    -----------------------------
-    
-    This function computes the SHA-256 hash of a given input string, encodes it using 
-    URL-safe Base64, and truncates the output to 22 characters for brevity.
+    Generate a truncated, URL-safe Base64 encoded SHA-256 hash of the input string.
+    =============================
+
+    This function takes an input string, computes its SHA-256 hash, and then encodes the hash in a URL-safe Base64 format. 
+    The resulting hash is truncated to 22 characters for brevity.
 
     -----------------------------
     Args:
     -----------------------------
-    - input_data (str): 
-        The input string to be hashed.
+        input_data (str): 
+            The input string to be hashed.
 
     -----------------------------
     Returns:
     -----------------------------
-    - str: 
-        A 22-character truncated, URL-safe Base64 encoded SHA-256 hash of the input string.
+        str: 
+            A 22-character truncated, URL-safe Base64 encoded SHA-256 hash of the input string.
     """
     
     # Compute a SHA-256 hash of the input string
@@ -155,36 +163,24 @@ def _generate_hash_code(input_data):
 
 def _get_similarity(a, b, method='custom'):
     """
-    Compute Similarity Between Two Strings
-    -----------------------------
-    
-    This function calculates the similarity between two strings using the specified method. 
-    It supports both 'levenshtein' and a custom similarity method that factors in suffixes.
-
-    -----------------------------
-    Args:
-    -----------------------------
-    - a (str): 
-        The first string for comparison.
-    - b (str): 
-        The second string for comparison.
-    - method (str, optional): 
-        The method to compute similarity. Defaults to 'custom'. Available options are:
-        - 'levenshtein': Computes similarity based on Levenshtein distance.
-        - 'custom': Separates main parts and suffixes for weighted similarity calculation.
-
-    -----------------------------
+    Compute the similarity between two strings using the specified method.
+    Parameters:
+    a (str): The first string to compare.
+    b (str): The second string to compare.
+    method (str): The method to use for computing similarity. 
+                  Options are 'levenshtein' and 'custom'. Default is 'custom'.
     Returns:
-    -----------------------------
-    - float: 
-        A similarity score between 0 and 1. A score of 1 indicates identical strings, 
-        while 0 indicates completely dissimilar strings.
-
-    -----------------------------
+    float: A similarity score between 0 and 1, where 1 indicates identical strings 
+           and 0 indicates completely different strings.
     Raises:
-    -----------------------------
-    Exception: 
-        If an unsupported method is specified.
+    Exception: If the specified method is not recognized.
+
+    'levenshtein' method:
+    - Computes the Levenshtein distance between the two strings and converts it to a similarity score.
+    'custom' method:
+    - Separates the main parts and suffixes of the strings based on predefined suffixes.
+    - Computes the Levenshtein distance for the main parts and suffixes separately.
+    - Assigns higher weight to the main part and lower weight to the suffix part to calculate the total similarity score.
     """
     
     if method == 'levenshtein':
@@ -252,24 +248,15 @@ def _get_similarity(a, b, method='custom'):
 
 def _backup():
     """
-    Create Ontology Backup and Manage Old Backups
-    -----------------------------
-    
-    This function saves the current ontology as a backup file and deletes older backups 
-    based on fine-grain and coarse-grain intervals to conserve storage space.
+    Creates a backup of the current ontology and manages cleanup of old backups.
 
-    -----------------------------
-    Side Effects:
-    -----------------------------
-    - Saves the ontology to the `MAIN_DIR` directory in RDF/XML format.
-    - Deletes old backup files according to defined intervals.
-    - Updates the `SAVE_INT` global variable and writes it to the configuration file.
-
-    -----------------------------
     Global Variables Used:
-    -----------------------------
     - SAVE_INT: Determines the naming and management of backups.
     - ONTO: The ontology object being saved.
+
+    File Management:
+    - Saves the ontology in RDF/XML format.
+    - Deletes older backups based on the fine and coarse grain intervals.
     """
     global SAVE_INT
     coarse_grain = 100  # Defines the coarse-grain interval
@@ -295,25 +282,6 @@ def _backup():
         cfg.write(str(SAVE_INT))
     
 def _extract_label(lab):
-    """
-    Extract Label from Ontology Entities
-    -----------------------------
-    
-    This helper function retrieves the string label from an ontology entity, 
-    handling cases where the label is a list or a direct string.
-
-    -----------------------------
-    Args:
-    -----------------------------
-    - lab (Union[str, list]): 
-        The label to extract, which could be a string or a list of strings.
-
-    -----------------------------
-    Returns:
-    -----------------------------
-    - str: 
-        The extracted label as a string.
-    """
     if isinstance(lab, list):
         return str(lab.first())
     else:
@@ -325,52 +293,23 @@ def _extract_label(lab):
 def add_kpi(superclass, label, description, unit_of_measure, parsable_computation_formula, 
             human_readable_formula=None, depends_on_machine=False, depends_on_operation=False):
     """
-    Add a New Key Performance Indicator (KPI) to the Ontology
-    -----------------------------
-    
-    This function validates and creates a new KPI in the ontology. It checks for duplicate labels, 
-    validates the superclass, and associates attributes, formulas, and dependencies with the KPI.
+    Adds a new KPI to the ontology.
 
-    -----------------------------
-    Args:
-    -----------------------------
-    - superclass (str): 
-        The label of the KPI's superclass, which must be unique and valid.
-    - label (str): 
-        A unique label for the new KPI.
-    - description (str): 
-        A descriptive text for the KPI.
-    - unit_of_measure (str): 
-        The unit of measurement for the KPI (e.g., 'kg', 'hours').
-    - parsable_computation_formula (str): 
-        A machine-readable formula to calculate the KPI's value.
-    - human_readable_formula (str, optional): 
-        A user-friendly version of the computation formula. Defaults to the parsable formula.
-    - depends_on_machine (bool, optional): 
-        Whether the KPI is dependent on machines. Defaults to False.
-    - depends_on_operation (bool, optional): 
-        Whether the KPI is dependent on operations. Defaults to False.
+    This function validates that the KPI's label and superclass are unique and correctly defined. 
+    It then creates the KPI and associates the provided attributes, formulas, and dependencies.
 
-    -----------------------------
-    Raises:
-    -----------------------------
-    Exception: 
-    - If the KPI label already exists.
-    - If the superclass is undefined or not unique.
-    - If the superclass is not a valid KPI class.
+    Parameters:
+    - superclass (str): The label of the superclass for the KPI.
+    - label (str): The unique label for the KPI.
+    - description (str): A text description of the KPI.
+    - unit_of_measure (str): The measurement unit for the KPI.
+    - parsable_computation_formula (str): A machine-readable formula for the KPI.
+    - human_readable_formula (str, optional): A user-friendly formula (default is the parsable formula).
+    - depends_on_machine (bool, optional): Whether the KPI depends on machines.
+    - depends_on_operation (bool, optional): Whether the KPI depends on operations.
 
-    -----------------------------
-    Side Effects:
-    -----------------------------
-    - Adds the KPI to the ontology.
-    - Updates global mappings for units of measure, formulas, and dependencies.
-    - Saves changes to the ontology via the `_backup` function.
-
-    -----------------------------
-    Prints:
-    -----------------------------
-    "KPI {label} successfully added to the ontology!" 
-        upon successful addition of the KPI.
+    Returns:
+    - None: Prints errors or creates the KPI instance.
     """
     if not human_readable_formula:
         human_readable_formula = parsable_computation_formula
@@ -411,36 +350,16 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
     
 def delete_kpi(label):
     """
-    Delete a Key Performance Indicator (KPI) from the Ontology
-    -----------------------------
-    
-    This function removes a KPI from the ontology after verifying it is not referenced by other KPIs.
+    Deletes a KPI from the ontology.
 
-    -----------------------------
-    Args:
-    -----------------------------
-    - label (str): 
-        The label of the KPI to be deleted.
+    This function checks if the KPI is used in the computation of other KPIs and raises an exception if it is.
+    If the KPI is not used, it deletes the KPI and updates the ontology.
 
-    -----------------------------
-    Raises:
-    -----------------------------
-    Exception: 
-        - If the KPI is undefined or not unique.
-        - If the target is not a valid KPI.
-        - If the KPI is used in the computation of other KPIs.
+    Parameters:
+    - label (str): The label of the KPI to delete.
 
-    -----------------------------
-    Side Effects:
-    -----------------------------
-    - Deletes the KPI entity from the ontology.
-    - Saves changes to the ontology via the `_backup` function.
-
-    -----------------------------
-    Prints:
-    -----------------------------
-    "KPI {label} successfully deleted from the ontology!" 
-        upon successful deletion of the KPI.
+    Returns:
+    - None: Prints success message or raises an exception if the KPI is used in other computations.
     """
     # Search for the KPI in the ontology.
     target = ONTO.search(label=label)
@@ -475,41 +394,18 @@ def delete_kpi(label):
 
 def add_process(process_label, process_description, steps_list):
     """
-    Add a New Process to the Ontology
-    -----------------------------
+    Adds a new process to the ontology with the given label, description, and steps.
     
-    This function creates a new process in the ontology by associating the given label, 
-    description, and a sequence of steps (machine-operation pairs).
-
-    -----------------------------
     Args:
-    -----------------------------
-    - process_label (str): 
-        A unique label for the process.
-    - process_description (str): 
-        A descriptive text for the process.
-    - steps_list (list of tuples): 
-        A sequence of steps, where each step is a tuple of (machine_label, operation_label).
-
-    -----------------------------
+        process_label (str): The label for the new process.
+        process_description (str): A description of the new process.
+        steps_list (list of tuples): A list of tuples where each tuple contains a machine label and an operation label.
     Raises:
-    -----------------------------
-    Exception: 
-        - If the process label already exists.
-        - If any machine or operation in the steps list is undefined, not unique, or invalid.
-
-    -----------------------------
-    Side Effects:
-    -----------------------------
-    - Adds the process and its associated steps to the ontology.
-    - Updates mappings for machines, operations, and step positions.
-    - Saves changes to the ontology via the `_backup` function.
-
-    -----------------------------
-    Prints:
-    -----------------------------
-    "Process {process_label} successfully added to the ontology!" 
-        upon successful addition of the process.
+        Exception: If a process with the same label already exists.
+        Exception: If a machine or operation in the steps list is not found or if there are multiple matches.
+        Exception: If a machine or operation in the steps list is not of the correct type.
+    Returns:
+        None
     """
     
     # request validation
@@ -563,38 +459,16 @@ def add_process(process_label, process_description, steps_list):
     
     _backup()
     print('Process', process_label, 'successfully added to the ontology!')
-
+            
 def delete_process(process_label):
     """
-    Delete a Process from the Ontology
-    -----------------------------
-    
-    This function removes a process and its associated steps from the ontology.
+    Deletes a process from the ontology.
 
-    -----------------------------
-    Args:
-    -----------------------------
-    - process_label (str): 
-        The label of the process to be deleted.
+    Parameters:
+    - process_label (str): The label of the process to delete.
 
-    -----------------------------
-    Raises:
-    -----------------------------
-    Exception: 
-        - If the process is undefined or not unique or If the target is not a valid process.
-
-    -----------------------------
-    Side Effects:
-    -----------------------------
-    - Deletes all steps associated with the process.
-    - Removes the process entity from the ontology.
-    - Saves changes to the ontology via the `_backup` function.
-
-    -----------------------------
-    Prints:
-    -----------------------------
-    "Process {process_label} successfully deleted from the ontology!" 
-        upon successful deletion of the process.
+    Returns:
+    - None: Prints a success message or raises an exception if the process is referenced elsewhere.
     """
     # Search for the process in the ontology.
     target = ONTO.search(label=process_label)
@@ -627,37 +501,17 @@ def delete_process(process_label):
 
 def add_operation(label, description):
     """
-    Add a New Operation to the Ontology
-    -----------------------------
-    
-    This function validates and creates a new operation in the ontology. It ensures the operation label is unique 
-    and assigns the provided label and description.
+    Adds a new operation to the ontology.
 
-    -----------------------------
-    Args:
-    -----------------------------
-    - label (str): 
-        A unique label for the operation.
-    - description (str): 
-        A descriptive text for the operation.
+    This function validates that the operation's label is unique and correctly defined.
+    It then creates the operation and associates the provided label and description.
 
-    -----------------------------
-    Raises:
-    -----------------------------
-    Exception: 
-        - If the operation label already exists.
+    Parameters:
+    - label (str): The unique label for the operation.
+    - description (str): A text description of the operation.
 
-    -----------------------------
-    Side Effects:
-    -----------------------------
-    - Adds the operation to the ontology.
-    - Saves changes to the ontology via the `_backup` function.
-
-    -----------------------------
-    Prints:
-    -----------------------------
-    "Operation {label} successfully added to the ontology!" 
-        upon successful addition of the operation.
+    Returns:
+    - None: Prints errors or creates the operation instance.
     """
     # Validate that the operation label does not already exist.
     if ONTO.search(label=label):
@@ -675,36 +529,16 @@ def add_operation(label, description):
 
 def delete_operation(label):
     """
-    Delete an Operation from the Ontology
-    -----------------------------
-    
-    This function removes an operation from the ontology after ensuring it is not used in any process steps.
+    Deletes an operation from the ontology.
 
-    -----------------------------
-    Args:
-    -----------------------------
-    - label (str): 
-        The label of the operation to be deleted.
+    This function checks if the operation is used in the computation of any KPIs and raises an exception if it is.
+    If the operation is not used, it deletes the operation and updates the ontology.
 
-    -----------------------------
-    Raises:
-    -----------------------------
-    Exception: 
-        - If the operation is undefined or not unique.
-        - If the target is not a valid operation.
-        - If the operation is used in process steps.
+    Parameters:
+    - label (str): The label of the operation to delete.
 
-    -----------------------------
-    Side Effects:
-    -----------------------------
-    - Deletes the operation entity from the ontology.
-    - Saves changes to the ontology via the `_backup` function.
-
-    -----------------------------
-    Prints:
-    -----------------------------
-    "Operation {label} successfully deleted from the ontology!" 
-        upon successful deletion of the operation.
+    Returns:
+    - None: Prints success message or raises an exception if the operation is used in computations.
     """
     # Search for the operation in the ontology.
     target = ONTO.search(label=label)
@@ -735,41 +569,16 @@ def delete_operation(label):
 
 def get_formulas(kpi):
     """
-    Retrieve and Expand Formulas for a KPI
-    -----------------------------
-    
-    This function retrieves the formula associated with a KPI and recursively resolves any nested KPI references 
-    to provide fully expanded formulas.
+    Retrieves and expands formulas associated with a given KPI.
 
-    -----------------------------
-    Args:
-    -----------------------------
-    - kpi (str): 
-        The label of the KPI whose formulas are to be retrieved.
+    This function identifies the formula for a KPI and recursively unrolls any nested KPIs 
+    referenced within the formula until all dependencies are fully resolved.
 
-    -----------------------------
+    Parameters:
+    - kpi (str): The label of the KPI whose formulas need to be expanded.
+
     Returns:
-    -----------------------------
-    - dict: 
-        A dictionary mapping KPI labels to their expanded formulas.
-
-    -----------------------------
-    Raises:
-    -----------------------------
-    Exception: 
-        - If the KPI is undefined or not unique.
-        - If the KPI label is invalid.
-        - If a referenced KPI in the formula is undefined or invalid.
-
-    -----------------------------
-    Side Effects:
-    -----------------------------
-    - Traverses the ontology to resolve all nested KPI references.
-
-    -----------------------------
-    Notes:
-    -----------------------------
-    The function recursively unrolls all dependencies until no further nested KPIs remain.
+    - kpi_formula (dict): A dictionary mapping KPI labels to their formulas.
     """
     # Search for the KPI in the ontology.
     target = ONTO.search(label=kpi)
@@ -811,43 +620,19 @@ def get_formulas(kpi):
 
 def get_closest_kpi_formulas(kpi, method='custom'):
     """
-    Find the Formulas for a KPI or Closest Matching KPI
-    -----------------------------
-    
-    This function retrieves formulas for a given KPI. If the KPI is not found, it calculates similarity scores 
-    to identify the closest matching KPI and returns its formulas.
+    Finds the formulas associated with a KPI or the closest matching KPI.
 
-    -----------------------------
-    Args:
-    -----------------------------
-    - kpi (str): 
-        The label of the KPI to search for.
-    - method (str, optional): 
-        The similarity metric to use for matching (default is 'custom').
+    If no formula is found for the given KPI, this function calculates similarity scores between 
+    the KPI and other ontology entities, returning formulas for the closest match.
 
-    -----------------------------
+    Parameters:
+    - kpi (str): The label of the KPI to search for.
+    - method (str, optional): The similarity metric to use (default is 'levenshtein').
+
     Returns:
-    -----------------------------
-    - tuple: 
-        - dict: A dictionary mapping KPI labels to their formulas.
-        - float: The similarity score (1 for exact matches).
-
-    -----------------------------
-    Raises:
-    -----------------------------
-    None directly. It handles missing KPIs by searching for the closest match.
-
-    -----------------------------
-    Side Effects:
-    -----------------------------
-    - Uses a similarity metric to compare the given KPI with other ontology entities.
-    - Returns the formulas for the closest match if an exact match is not found.
-
-    -----------------------------
-    Notes:
-    -----------------------------
-    - The function uses `get_formulas` to retrieve formulas for the closest match.
-    - Similarity calculation methods can be extended as needed.
+    - tuple:
+      - formulas (dict): A dictionary mapping KPI labels to their formulas.
+      - similarity (float): The similarity score (1 for exact matches).
     """
     # Attempt to retrieve the exact formulas for the given KPI.
     try:
@@ -874,32 +659,16 @@ def get_closest_kpi_formulas(kpi, method='custom'):
 
 def get_instances(owl_class_label):
     """
-    Retrieve all instances of a given OWL class or individual.
-    -----------------------------
-    
-    This function checks if the provided label corresponds to a class or an individual, 
-    and then retrieves all instances of that class, including instances of its subclasses. 
-    If the label corresponds to an individual, it directly returns that individual.
+    Retrieves all instances of a given OWL class.
 
-    -----------------------------
-    Args:
-    -----------------------------
-    - owl_class_label (str): 
-        The label of the OWL class or individual to search for.
+    If the input label corresponds to a class, instances of the class and its subclasses are returned.
+    If the label corresponds to an individual, it is directly returned.
 
-    -----------------------------
+    Parameters:
+    - owl_class_label (str): The label of the OWL class or instance to search for.
+
     Returns:
-    -----------------------------
-    - list: 
-        A list containing labels of all instances of the given class or individual, 
-        or an empty list if no instances are found.
-
-    -----------------------------
-    Raises:
-    -----------------------------
-    Exception: 
-        If no matches or multiple matches are found for the provided label.
-        If the input is neither a class nor an individual.
+    - list: Labels of all matching instances, or an empty list if none are found.
     """
     # Search for the class or individual in the ontology using the provided label.
     target = ONTO.search(label=owl_class_label)
@@ -935,46 +704,27 @@ def get_instances(owl_class_label):
     return list(instances)
 
 def get_closest_class_instances(owl_class_label, istances_type='a', method='levenshtein'):
+    
     """
-    Retrieve instances of the closest matching OWL class or individual.
-    -----------------------------
-    
-    This function tries to find an exact match for the provided class or individual label.
-    If no exact match is found, it searches for the most similar element using a similarity method 
-    (Levenshtein by default). It also allows filtering instances by type (e.g., KPI, machine, etc.).
+    Retrieves all instances of a given OWL class or individual. If an exact match is not found, 
+    searches for the most similar element in the knowledge base (KB).
 
-    -----------------------------
-    Args:
-    -----------------------------
-    - owl_class_label (str): 
-        The label of the OWL class or individual to search for.
-    
-    - istances_type (str, optional): 
-        The type of instances to return. Defaults to 'a' for all types.
-        Valid options are:
-            - 'k' for KPI
-            - 'm' for machine
-            - 'o' for operation
-            - 'p' for process
-            - 'a' for all types.
-    
-    - method (str, optional): 
-        The similarity method to use. Defaults to 'levenshtein'.
+    Parameters:
+    - owl_class_label (str): The label of the class or individual to search for.
+    - istances_type (str): The type of instances to return (default is 'a' for all). 
+      Options are:
+        - 'k' for KPI
+        - 'm' for machine
+        - 'o' for operation
+        - 'p' for process
+        - 'a' for all
+    - method (str): The similarity method (default is 'levenshtein').
 
-    -----------------------------
     Returns:
-    -----------------------------
-    - tuple: 
-        - list: Instances of the closest matching class or individual.
-        - float: Similarity score of the closest match.
-
-    -----------------------------
-    Raises:
-    -----------------------------
-    Exception: 
-        If no instances are found or if the similarity computation fails.
+    - tuple:
+      - list: Instances of the closest matching class or individual.
+      - float: The similarity score of the closest match.
     """
-    
     # Attempt to retrieve the instances of the exact class or individual.
     try:
         ret = get_instances(owl_class_label)
@@ -1036,25 +786,19 @@ def get_object_properties(owl_label):
     based on its label. It also returns information about superclasses, subclasses, and instances if the element
     is a class or individual and entity_type.
 
-    -----------------------------
     Args:
-    -----------------------------
-    - owl_label (str): 
-        The label of the ontology element (class or individual) whose properties are to be retrieved.
+        owl_label (str): The label of the ontology element (class or individual) whose properties are to be retrieved.
 
-    -----------------------------
     Returns:
-    -----------------------------
-    dict: 
-        A dictionary containing the information associated with the entity, including:
-        - 'label': The label of the element.
-        - 'description': The description annotation property, if available.
-        - 'depends_on_other_kpi': A list of KPI labels the element depends on based on the parsable computational formula.
-        - 'superclasses': List of superclasses of the element (for classes and individuals).
-        - 'subclasses': List of subclasses of the element (for classes).
-        - 'instances': List of instances of the element (for classes).
-        - 'entity_type': The nature of the referred entity which can be class, instance or property.
-        - 'ontology_property_name': List of every entity related to the referenced entity with the 'ontology_property_name' property.
+        dict: A dictionary containing the information associated with the entity, including:
+            - 'label': The label of the element.
+            - 'description': The description annotation property, if available.
+            - 'depends_on_other_kpi': A list of KPI labels the element depends on based on the parsable computational formula.
+            - 'superclasses': List of superclasses of the element (for classes and individuals).
+            - 'subclasses': List of subclasses of the element (for classes).
+            - 'instances': List of instances of the element (for classes).
+            - 'entity_type': The nature of the referred entity which can be class, istance or property 
+            - 'ontology_property_name': List of every entity related to the referenced entoty with the 'ontology_property_name' property
     """
     # Search for the target element using its label in the ontology.
     target = ONTO.search(label=owl_label)
@@ -1121,22 +865,14 @@ def get_closest_object_properties(owl_label, method='custom'):
     Apply get_object_properties to the entity whose label is the closest match to the given label.
     The closeness is determined by a similarity measure (default is Levenshtein distance).
 
-    -----------------------------
     Args:
-    -----------------------------
-    - owl_label (str): 
-        The label of the ontology element whose closest match is to be found.
-    
-    - method (str, optional): 
-        The similarity measure to use for finding the closest match (default: 'levenshtein').
+        owl_label (str): The label of the ontology element whose closest match is to be found.
+        method (str): The similarity measure to use for finding the closest match (default: 'levenshtein').
 
-    -----------------------------
     Returns:
-    -----------------------------
-    - tuple: 
-        A tuple containing:
-        - dict: The properties of the closest matching element.
-        - float: The similarity score (between 0 and 1) of the closest match.
+        tuple: A tuple containing:
+            - dict: The properties of the closest matching element.
+            - float: The similarity score (between 0 and 1) of the closest match.
     """
     # Attempt to retrieve properties for the exact match of the owl_label.
     try:
@@ -1191,30 +927,14 @@ def get_closest_object_properties(owl_label, method='custom'):
 
 def get_steps(process_label):
     """
-    Retrieve the steps associated with a given process label from the ontology.
-    -----------------------------
-    
-    -----------------------------
-    Args:
-    -----------------------------
-    - process_label (str): The label of the process to search for in the ontology.
-        
-    -----------------------------
+    Retrieves the steps of a given process.
+
+    Parameters:
+    - process_label (str): The label of the process whose steps are to be retrieved.
+
     Returns:
-    -----------------------------
-    - list of tuple: A list of tuples where each tuple contains:
-        - The position of the step in the process.
-        - The label of the associated machine.
-        - The label of the associated operation.
-    
-    -----------------------------
-    Raises:
-    -----------------------------
-    Exception: 
-        - If no process or more than one process is found with the given label.
-        - If the found target is not a valid process.
+    - list: A list of dictionaries containing the details of each step in the process.
     """
-    
     
     # Search for the process in the ontology.
     target = ONTO.search(label=process_label)
@@ -1238,20 +958,15 @@ def get_steps(process_label):
 def get_closest_process_steps(process_label, method='levenshtein'):
     """
     Finds the steps associated with a process or the closest matching process.
-    -----------------------------
-    
+
     If no process is found for the given label, this function calculates similarity scores between 
     the process and other ontology entities, returning steps for the closest match.
 
-    -----------------------------
     Parameters:
-    -----------------------------
     - process_label (str): The label of the process to search for.
     - method (str, optional): The similarity metric to use (default is 'levenshtein').
 
-    -----------------------------
     Returns:
-    -----------------------------
     - tuple:
       - list: Steps of the closest matching process.
       - float: The similarity score (1 for exact matches).
