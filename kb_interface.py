@@ -231,19 +231,8 @@ def _extract_label(lab):
     else:
         return str(lab)
    
-# TODO: eliminare 
-def _fix():
-    for el in get_instances('kpi'):
-        target = ONTO.search(label=el)[0]
-        if el in ['energy_efficiency', 'non_operative_time', 'operative_consumption', 'total_consumption', 'total_energy_cost']:
-            DEPENDS_ON[target] = [OPERATION_CLASS]
-        else:
-            DEPENDS_ON[target] = [MACHINE_CASS, OPERATION_CLASS]
-
-    ONTO.save(file='./new_onto_test.owl', format="rdfxml")
 
 
- 
  
 def get_formulas(kpi):
     """
@@ -437,6 +426,7 @@ def delete_kpi(label):
 
 
 
+
 def add_process(process_label, process_description, steps_list):
     """
     Adds a new process to the ontology with the given label, description, and steps.
@@ -540,6 +530,7 @@ def delete_process(process_label):
 
 
 
+
 def add_operation(label, description):
     """
     Adds a new operation to the ontology.
@@ -605,6 +596,7 @@ def delete_operation(label):
     
     _backup()  # Save changes.
     print('OPERATION', label, 'successfully deleted from the ontology!')
+    
     
 
 
