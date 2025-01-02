@@ -41,20 +41,25 @@ PROCESS_STEP = None # Ontology property of process
 
 def start(backup_number=1):
     """
-    Initializes the global ontology and related variables. 
-    This function must necessarily be called every time it is desired 
-    to initialize the KB and use other methods to interact.
+    Initialize the ontology and global variables.
+    This function loads an ontology from a specified backup number or the latest save interval.
+    It also assigns specific ontology classes to global variables based on their labels.
     
-    Parameters:
-    - backup_number (int, optional): The number indicating which backup file to load, inside the backup folder.
-      If not specified, it reads the configuration file to determine the latest backup.
-
-    Global Variables Modified:
-    - SAVE_INT: Save interval value read or set.
-    - ONTO: The ontology object loaded from the backup.
-    - PARSABLE_FORMULA, HUMAN_READABLE_FORMULA, UNIT_OF_MEASURE, DEPENDS_ON,
-      OPERATION_CASS, MACHINE_CASS, KPI_CLASS: Specific ontology classes extracted.
+    Args:
+        backup_number (int, optional): The backup number to load the ontology from. Defaults to 1.
+        
+    Raises:
+        IndexError: If any of the ontology classes cannot be found by their labels.
+        
+    Side Effects:
+        Modifies the global variables: SAVE_INT, ONTO, PARSABLE_FORMULA, HUMAN_READABLE_FORMULA,
+        UNIT_OF_MEASURE, DEPENDS_ON, OPERATION_CLASS, MACHINE_CASS, KPI_CLASS, PROCESS_CLASS,
+        MACHINE_OPERATION_CLASS, ASSOCIATED_MACHINE, ASSOCIATED_OPERATION, PROCESS_STEP_POSITION, PROCESS_STEP.
+        
+    Prints:
+        A success message indicating that the ontology has been successfully initialized.
     """
+ 
     # Declare global variables to ensure they are modified globally
     global SAVE_INT, ONTO, PARSABLE_FORMULA, HUMAN_READABLE_FORMULA
     global UNIT_OF_MEASURE, DEPENDS_ON, OPERATION_CLASS, MACHINE_CASS, KPI_CLASS
@@ -97,14 +102,16 @@ def start(backup_number=1):
 
 def _generate_hash_code(input_data):
     """
-    Generates a compact, alphanumeric hash code for a given input string.
-
-    Parameters:
-    - input_data (str): The input string to generate the hash code from.
-
+    Generate a truncated, URL-safe Base64 encoded SHA-256 hash of the input string.
+    
+    Args:
+        input_data (str): The input string to be hashed.
+        
     Returns:
-    - hash_code (str): A shortened alphanumeric hash code derived from the input data.
+        str: A 22-character truncated, URL-safe Base64 encoded SHA-256 hash of the input string.
     """
+
+    
     # Compute a SHA-256 hash of the input string
     hash_obj = hashlib.sha256(input_data.encode())
     # Convert the hash to a URL-safe Base64 encoded string
@@ -117,16 +124,31 @@ def _generate_hash_code(input_data):
 
 def _get_similarity(a, b, method='custom'):
     """
-    Computes similarity between two strings using a chosen method.
-
+    Compute the similarity between two strings using the specified method.
+    
     Parameters:
-    - a (str): First string to compare.
-    - b (str): Second string to compare.
-    - method (str, optional): The method to use, default is 'custom'.
-
+    a (str): The first string to compare.
+    b (str): The second string to compare.
+    method (str): The method to use for computing similarity. 
+                  Options are 'levenshtein' and 'custom'. Default is 'custom'.
+                  
     Returns:
-    - similarity (float): A value between 0 and 1 indicating similarity.
+    float: A similarity score between 0 and 1, where 1 indicates identical strings 
+           and 0 indicates completely different strings.
+           
+    Raises:
+    Exception: If the specified method is not recognized.
+    
+    Method Details:
+    - 'levenshtein': Computes the Levenshtein distance between the two strings and 
+                     converts it to a similarity score.
+    - 'custom': Separates the main parts and suffixes of the strings, computes 
+                similarity for each part, and combines them with different weights.
+                Suffixes considered are: 'sum', 'min', 'max', 'avg', 'mean', 'tot', 
+                'count', 'var'.
     """
+
+    
     if method == 'levenshtein':
         # Compute Levenshtein distance
         distance = Levenshtein.distance(a, b)
@@ -175,7 +197,7 @@ def _get_similarity(a, b, method='custom'):
             # Compute Levenshtein distance for the suffixes (second parts of the strings)
             suffix_distance = Levenshtein.distance(a_suffix, b_suffix)
             suffix_similarity = 1 - suffix_distance / max(len(a_suffix), len(b_suffix))
-        elif b_suffix is 'sum':
+        elif b_suffix == 'sum':
             # If only one string has a suffix, we treat it as completely different
             suffix_similarity = 1e-08
         else:
@@ -203,9 +225,9 @@ def _backup():
     - Deletes older backups based on the fine and coarse grain intervals.
     """
     global SAVE_INT
-    coarse_grain = 20  # Defines the coarse-grain interval
-    max_fine_b = 10  # Maximum fine-grain backups to keep
-    max_coarse_b = 5  # Maximum coarse-grain backups to keep
+    coarse_grain = 100  # Defines the coarse-grain interval
+    max_fine_b = 15  # Maximum fine-grain backups to keep
+    max_coarse_b = 10  # Maximum coarse-grain backups to keep
 
     # Save the current ontology
     ONTO.save(file=str(MAIN_DIR / (str(SAVE_INT) + '.owl')), format="rdfxml")
@@ -231,96 +253,6 @@ def _extract_label(lab):
     else:
         return str(lab)
    
-
-
- 
-def get_formulas(kpi):
-    """
-    Retrieves and expands formulas associated with a given KPI.
-
-    This function identifies the formula for a KPI and recursively unrolls any nested KPIs 
-    referenced within the formula until all dependencies are fully resolved.
-
-    Parameters:
-    - kpi (str): The label of the KPI whose formulas need to be expanded.
-
-    Returns:
-    - kpi_formula (dict): A dictionary mapping KPI labels to their formulas.
-    """
-    # Search for the KPI in the ontology.
-    target = ONTO.search(label=kpi)
-    
-    # Ensure exactly one match is found; otherwise, report an error.
-    if not target or len(target) > 1:
-        raise Exception(f"DOUBLE OR NONE REFERENCED KPI: {kpi}")
-    
-    target = target[0]  # Select the first result.
-    
-    # Verify the target is a KPI.
-    if not any(issubclass(cls, KPI_CLASS) for cls in target.is_a):
-        raise Exception(f"IS NOT A VALID KPI: {kpi}")
-    
-    # Initialize lists for formulas to unroll and store resolved formulas.
-    to_unroll = [PARSABLE_FORMULA[target][0]]
-    kpi_formula = {kpi: PARSABLE_FORMULA[target][0]}
-    
-    # Expand all formulas by resolving nested KPI references.
-    while to_unroll:
-        # Match every KPI reference contained in the formula to_unroll[0]
-        matches = re.findall(r'R°[A-Za-z_]+°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', to_unroll.pop(0))
-        
-        for match in matches:
-            # For every macth append the kpi to to_unroll and save the data to be returnedù
-            # And recursively match KPI references
-            kpi_name = re.match(r'R°([A-Za-z_]+)°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', match).group(1)
-            target = ONTO.search(label=kpi_name)
-            
-            if not target or len(target) > 1:
-                # this exception is raised only if some formula is wrong
-                raise Exception(f"DOUBLE OR NONE REFERENCED KPI: {kpi_name}")
-            
-            target = target[0]
-            to_unroll.append(PARSABLE_FORMULA[target][0])
-            kpi_formula[kpi_name] = PARSABLE_FORMULA[target][0]
-    
-    return kpi_formula
-
-def get_closest_kpi_formulas(kpi, method='custom'):
-    """
-    Finds the formulas associated with a KPI or the closest matching KPI.
-
-    If no formula is found for the given KPI, this function calculates similarity scores between 
-    the KPI and other ontology entities, returning formulas for the closest match.
-
-    Parameters:
-    - kpi (str): The label of the KPI to search for.
-    - method (str, optional): The similarity metric to use (default is 'levenshtein').
-
-    Returns:
-    - tuple:
-      - formulas (dict): A dictionary mapping KPI labels to their formulas.
-      - similarity (float): The similarity score (1 for exact matches).
-    """
-    # Attempt to retrieve the exact formulas for the given KPI.
-    try:
-        ret = get_formulas(kpi)
-        
-        return ret, 1  # Return exact match with similarity score of 1.
-    except:
-        # Initialize variables to track the closest match and similarity.
-        max_val = -math.inf
-        max_label = ''
-        
-        # Compare the KPI with all individuals in the KPI class.
-        for ind in KPI_CLASS.instances():
-            similarity = _get_similarity(kpi, ind.label.en.first(), method)
-            if max_val < similarity:
-                max_val = similarity
-                max_label = ind.label.en.first()
-        
-        # Return the formulas for the closest matching label.
-        return get_formulas(max_label), max_val
-        
 
 
 
@@ -419,7 +351,6 @@ def delete_kpi(label):
     
     # Remove the KPI from the ontology.
     or2.destroy_entity(target)
-    print(DEPENDS_ON[target])
     
     _backup()  # Save changes.
     print('KPI', label, 'successfully deleted from the ontology!')
@@ -491,6 +422,9 @@ def add_process(process_label, process_description, steps_list):
     new_process.label = [or2.locstr(process_label, lang='en')]
     new_process.description = [or2.locstr(process_description, lang='en')]
     PROCESS_STEP[new_process] = steps
+    
+    _backup()
+    print('Process', process_label, 'successfully added to the ontology!')
             
 def delete_process(process_label):
     """
@@ -526,7 +460,7 @@ def delete_process(process_label):
     
     # Save changes to the ontology.
     _backup()
-    print('PROCESS', process_label, 'successfully deleted from the ontology!')
+    print('Process', process_label, 'successfully deleted from the ontology!')
 
 
 
@@ -592,12 +526,101 @@ def delete_operation(label):
                 
     # Remove the operation from the ontology.
     or2.destroy_entity(target)
-    print(f"Operation {label} successfully deleted from the ontology!")
     
     _backup()  # Save changes.
-    print('OPERATION', label, 'successfully deleted from the ontology!')
+    print('Operation', label, 'successfully deleted from the ontology!')
     
+
+
+
+def get_formulas(kpi):
+    """
+    Retrieves and expands formulas associated with a given KPI.
+
+    This function identifies the formula for a KPI and recursively unrolls any nested KPIs 
+    referenced within the formula until all dependencies are fully resolved.
+
+    Parameters:
+    - kpi (str): The label of the KPI whose formulas need to be expanded.
+
+    Returns:
+    - kpi_formula (dict): A dictionary mapping KPI labels to their formulas.
+    """
+    # Search for the KPI in the ontology.
+    target = ONTO.search(label=kpi)
     
+    # Ensure exactly one match is found; otherwise, report an error.
+    if not target or len(target) > 1:
+        raise Exception(f"DOUBLE OR NONE REFERENCED KPI: {kpi}")
+    
+    target = target[0]  # Select the first result.
+    
+    # Verify the target is a KPI.
+    if not any(issubclass(cls, KPI_CLASS) for cls in target.is_a):
+        raise Exception(f"IS NOT A VALID KPI: {kpi}")
+    
+    # Initialize lists for formulas to unroll and store resolved formulas.
+    to_unroll = [PARSABLE_FORMULA[target][0]]
+    kpi_formula = {kpi: PARSABLE_FORMULA[target][0]}
+    
+    # Expand all formulas by resolving nested KPI references.
+    while to_unroll:
+        # Match every KPI reference contained in the formula to_unroll[0]
+        matches = re.findall(r'R°[A-Za-z_]+°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', to_unroll.pop(0))
+        
+        for match in matches:
+            # For every macth append the kpi to to_unroll and save the data to be returnedù
+            # And recursively match KPI references
+            kpi_name = re.match(r'R°([A-Za-z_]+)°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', match).group(1)
+            target = ONTO.search(label=kpi_name)
+            
+            if not target or len(target) > 1:
+                # this exception is raised only if some formula is wrong
+                raise Exception(f"DOUBLE OR NONE REFERENCED KPI: {kpi_name}")
+            
+            target = target[0]
+            to_unroll.append(PARSABLE_FORMULA[target][0])
+            kpi_formula[kpi_name] = PARSABLE_FORMULA[target][0]
+    
+    return kpi_formula
+
+def get_closest_kpi_formulas(kpi, method='custom'):
+    """
+    Finds the formulas associated with a KPI or the closest matching KPI.
+
+    If no formula is found for the given KPI, this function calculates similarity scores between 
+    the KPI and other ontology entities, returning formulas for the closest match.
+
+    Parameters:
+    - kpi (str): The label of the KPI to search for.
+    - method (str, optional): The similarity metric to use (default is 'levenshtein').
+
+    Returns:
+    - tuple:
+      - formulas (dict): A dictionary mapping KPI labels to their formulas.
+      - similarity (float): The similarity score (1 for exact matches).
+    """
+    # Attempt to retrieve the exact formulas for the given KPI.
+    try:
+        ret = get_formulas(kpi)
+        
+        return ret, 1  # Return exact match with similarity score of 1.
+    except:
+        # Initialize variables to track the closest match and similarity.
+        max_val = -math.inf
+        max_label = ''
+        
+        # Compare the KPI with all individuals in the KPI class.
+        for ind in KPI_CLASS.instances():
+            similarity = _get_similarity(kpi, ind.label.en.first(), method)
+            if max_val < similarity:
+                max_val = similarity
+                max_label = ind.label.en.first()
+        
+        # Return the formulas for the closest matching label.
+        return get_formulas(max_label), max_val
+        
+
 
 
 def get_instances(owl_class_label):
@@ -646,7 +669,7 @@ def get_instances(owl_class_label):
     # Return the list of instances found.
     return list(instances)
 
-def get_closest_class_instances(owl_class_label, istances_type='a', method='custom'):
+def get_closest_class_instances(owl_class_label, istances_type='a', method='levenshtein'):
     
     """
     Retrieves all instances of a given OWL class or individual. If an exact match is not found, 
@@ -718,7 +741,6 @@ def get_closest_class_instances(owl_class_label, istances_type='a', method='cust
                 max_label = _extract_label(ind.label)
         
         # Retrieve the instances of the closest matching label and return them.
-        print(max_label)
         return get_instances(max_label), max_val
         
 
@@ -867,3 +889,70 @@ def get_closest_object_properties(owl_label, method='custom'):
         return get_object_properties(max_label), max_val
         
 
+
+
+def get_steps(process_label):
+    """
+    Retrieves the steps of a given process.
+
+    Parameters:
+    - process_label (str): The label of the process whose steps are to be retrieved.
+
+    Returns:
+    - list: A list of dictionaries containing the details of each step in the process.
+    """
+    
+    # Search for the process in the ontology.
+    target = ONTO.search(label=process_label)
+    
+    # Ensure exactly one match is found; otherwise, report an error.
+    if not target or len(target) > 1:
+        raise Exception(f"DOUBLE OR NONE REFERENCED PROCESS: {process_label}")
+    
+    target = target[0]  # Select the first result.
+    
+    # Verify the target is a process.
+    if not isinstance(target, PROCESS_CLASS):
+        raise Exception(f"IS NOT A VALID PROCESS: {process_label}")
+    
+    steps = []
+    for s in PROCESS_STEP[target]:
+        steps.append((PROCESS_STEP_POSITION[s][0], _extract_label(ASSOCIATED_MACHINE[s][0].label), _extract_label(ASSOCIATED_OPERATION[s][0].label)))
+
+    return steps
+
+def get_closest_process_steps(process_label, method='levenshtein'):
+    """
+    Finds the steps associated with a process or the closest matching process.
+
+    If no process is found for the given label, this function calculates similarity scores between 
+    the process and other ontology entities, returning steps for the closest match.
+
+    Parameters:
+    - process_label (str): The label of the process to search for.
+    - method (str, optional): The similarity metric to use (default is 'levenshtein').
+
+    Returns:
+    - tuple:
+      - list: Steps of the closest matching process.
+      - float: The similarity score (1 for exact matches).
+    """
+    # Attempt to retrieve the steps of the exact process.
+    try:
+        ret = get_steps(process_label)
+        
+        return ret, 1  # Return exact match with similarity score of 1.
+    except:
+        # Initialize variables to track the closest match and similarity.
+        max_val = -math.inf
+        max_label = ''
+        
+        # Compare the process with all individuals in the PROCESS_CLASS.
+        for ind in PROCESS_CLASS.instances():
+            similarity = _get_similarity(process_label, ind.label.en.first(), method)
+            if max_val < similarity:
+                max_val = similarity
+                max_label = ind.label.en.first()
+        
+        # Return the steps for the closest matching label.
+        return get_steps(max_label), max_val

@@ -36,7 +36,8 @@ def random_modify(s, n):
 
 modify_count = 7
 #to_test = ['get_closest_object_properties']
-to_test = ['get_closest_kpi_formulas', 'get_closest_class_instances', 'get_closest_object_properties', 'add_kpi']
+to_test = ['add_delete_kpi', 'add_delete_operation', 'add_delete_process']
+
 random.seed(69)
 
 kbi.start()
@@ -135,42 +136,90 @@ if 'get_closest_object_properties' in to_test:
 
 
 
-if 'add_kpi' in to_test:
-    test_create = [['downtime_kpi', 
-                    'mean_time_between_failures', 
-                    'Mean time between failures cumulative over machine-opertion pairs', 
-                    's', 
-                    'A°sum°mo[S°/[ R°bad_cycles_sum°T°m°o° ; R°time_sum°T°m°o° ]]',
-                    'sum_M_O(bad_cycles_sum(T,m,o)/time_sum(T,m,o))',
-                    True,
-                    True], 
-                
-                ['utilization_kpi', 
-                    'availability', 
-                    'Percentage of machine uptime in respect to machine downtime over each machine-operation pairs', 
-                    '%', 
-                    'S°*[ S°/[ A°sum°m[ R°time_sum°T°m°working° ] ; S°+[ A°sum°m[ R°time_sum°T°m°idle° ] ; A°sum°m[ R°time_sum°T°m°offline° ] ] ] ; C°100° ]',
-                    '(sum_M( time_sum(T,m,working)) / ( sum_M(time_sum(T,m,Idle)) + sum_M(time_sum(T,m,offline)) ) )*100',
-                    True,
-                    False]]
+if 'add_delete_kpi' in to_test:
 
-    print('Testing add_kpi and backups')
+    print('Testing add_kpi')
     for i in range(200):
-        kbi.add_kpi(*['downtime_kpi', str(i), 'desc','unit', 'form'])
+        kbi.add_kpi(*['downtime_kpi', 'kpi' + str(i), 'desc','unit', 'form'])
 
     time.sleep(2)
             
-    # Definisci il percorso della cartella
-    folder = pathlib.Path('backups')
+    print('Testing delete_kpi')
+    for i in range(200):
+        kbi.delete_kpi('kpi' + str(i))
 
-    # Verifica che la cartella esista
-    if folder.exists() and folder.is_dir():
-        # Elimina tutti i file nella cartella, eccetto 0.owl
-        for file in folder.iterdir():
-            if file.is_file() and file.name != '0.owl':
-                file.unlink()  # Rimuove il file
-                
-    with open('config.cfg', 'w+') as cfg:
-        cfg.write(str(1)) 
+    time.sleep(2)
+        
+
+if 'add_delete_operation' in to_test:
+
+    print('Testing add_operation')
+    for i in range(200):
+        kbi.add_operation(*['op' + str(i), 'desc'])
+
+    time.sleep(2)
+            
+    print('Testing delete_operation')
+    for i in range(200):
+        kbi.delete_operation('op' + str(i))
+
+    time.sleep(2)      
+    
+if 'add_delete_process' in to_test:
+    op = ['working',
+   'visual_inspection',
+   'aerodynamic_testing',
+   'riveting',
+   'final_assembly',
+   'welding_parts',
+   'metal_cutting',
+   'assembly',
+   'idle',
+   'rough_cutting',
+   'precision_cutting',
+   'final_welding',
+   'riveting_assembly',
+   'edge_welding',
+   'pre_assembly',
+   'parts_welding',
+   'offline',
+   'material_cutting',
+   'stress_testing',
+   'functional_testing',
+   'quality_testing']
+    for o in op:
+        try:
+            kbi.add_operation(o, 'desc')
+        except:
+            pass
+        
+    mach = ['testing_machine_3',
+   'low_capacity_cutting_machine_1',
+   'riveting_machine_1',
+   'assembly_machine_2',
+   'medium_capacity_cutting_machine_2',
+   'medium_capacity_cutting_machine_1',
+   'laser_welding_machine_1',
+   'large_capacity_cutting_machine_2',
+   'testing_machine_2',
+   'laser_cutter',
+   'assembly_machine_1',
+   'assembly_machine_3',
+   'testing_machine_1',
+   'large_capacity_cutting_machine_1',
+   'medium_capacity_cutting_machine_3',
+   'laser_welding_machine_2']
+    
+    print('Testing add_process')
+    for i in range(50):
+        kbi.add_process(*['pr' + str(i), 'desc', [(random.choice(mach), random.choice(op)) for _ in range(random.randint(1, 10))]])
+
+    time.sleep(2)
+            
+    print('Testing delete_process')
+    for i in range(50):
+        kbi.delete_process('pr' + str(i))
+
+    time.sleep(2)     
         
 print('Test ended')

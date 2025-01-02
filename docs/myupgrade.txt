@@ -4,12 +4,9 @@
 4 - ottima modifica custom alla similarità
 5 - aggiunto add e delete processi
 6 - aggiunto add e delete operation
+7 - testate funzioni al volo volando
 
 DA FARE:
-TEST DELETE KPI
-creare la funzione per creare e eliminare processi
-
-test e showcase per i processi
 
 modificare documentazione 
 creare report
