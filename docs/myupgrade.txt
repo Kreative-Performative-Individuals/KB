@@ -1,4 +1,5 @@
 1 - ho aggiunto i processi, coppie macchina e operazione e ogni prorietà utile al caso
+1.5 - ho cambiato la gerarchia delle operazioni in una migliore
 2 - migliorato la vecchia implementazione per fare raise eccezioni e non solo stampe
 3 - migliorato la funzione get closest class istances
 4 - ottima modifica custom alla similarità

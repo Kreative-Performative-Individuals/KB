@@ -183,8 +183,8 @@ def _get_similarity(a, b, method='custom'):
     -----------------------------
     Raises:
     -----------------------------
-    Exception: 
-        If an unsupported method is specified.
+    ValueError: 
+    - If an unsupported method is specified.
     """
     
     if method == 'levenshtein':
@@ -247,8 +247,9 @@ def _get_similarity(a, b, method='custom'):
         return total_similarity
     
     else:
-        # raise exception if method is not recognized
-        raise Exception(f'METHOD NOT FOUND: {method}')
+        # Raise a more specific exception with detailed information
+        raise ValueError(f"Unrecognized method '{method}' encountered. Please check the method name or ensure it is properly defined.")
+
 
 def _backup():
     """
@@ -354,10 +355,12 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
     -----------------------------
     Raises:
     -----------------------------
-    Exception: 
-    - If the KPI label already exists.
-    - If the superclass is undefined or not unique.
-    - If the superclass is not a valid KPI class.
+    ValueError: 
+    - If the KPI label already exists in the ontology.
+    - If the superclass is undefined or referenced multiple times.
+
+    TypeError: 
+    - If the superclass is not a valid KPI class or derived from it.
 
     -----------------------------
     Side Effects:
@@ -377,18 +380,19 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
     
     # Validate that the KPI label does not already exist.
     if ONTO.search(label=label):
-        raise Exception(f'KPI ALREADY EXISTS: {label}')
-    
+        raise ValueError(f"KPI '{label}' already exists in the ontology. Please choose a unique label.")
+
     # Validate that the superclass is defined and unique.
     target = ONTO.search(label=superclass)
     if not target or len(target) > 1:
-        raise Exception(f"DOUBLE OR NONE REFERENCED CLASS: {superclass}")
-    
+        raise ValueError(f"The superclass '{superclass}' is either missing or referenced multiple times. Ensure there is only one unique reference.")
+
     target = target[0]
-    
+
     # Ensure the superclass is valid (either a KPI class or derived from it).
     if not (KPI_CLASS == target or any(KPI_CLASS in cls.ancestors() for cls in target.is_a)):
-        raise Exception(f"NOT A VALID SUPERCLASS: {superclass}")
+        raise TypeError(f"The specified superclass '{superclass}' is not valid. It must be either the KPI class or derived from it.")
+
  
     # Create the KPI and assign attributes.
     new_el = target(_generate_hash_code(label))
@@ -425,10 +429,13 @@ def delete_kpi(label):
     -----------------------------
     Raises:
     -----------------------------
-    Exception: 
-        - If the KPI is undefined or not unique.
-        - If the target is not a valid KPI.
-        - If the KPI is used in the computation of other KPIs.
+    ValueError: 
+    - If more than one or no KPI is found for the given label.
+    - If the KPI is used in the computation of other KPIs.
+    
+    TypeError: 
+    - If the target is not a valid KPI (not an instance of KPI_CLASS).
+
 
     -----------------------------
     Side Effects:
@@ -447,14 +454,14 @@ def delete_kpi(label):
     
     # Ensure exactly one match is found; otherwise, report an error.
     if not target or len(target) > 1:
-        raise Exception(f"DOUBLE OR NONE REFERENCED KPI: {label}")
-    
+        raise ValueError(f"More than one or no KPI found for label: {label}")
+
     target = target[0]  # Select the first result.
-    
+
     # Verify the target is a KPI.
     if not isinstance(target, KPI_CLASS):
-        raise Exception(f"IS NOT A VALID KPI: {label}")
-    
+        raise TypeError(f"The lable {label} refer to an entity that is not an instance of KPI_CLASS.")
+
     # Check if the KPI is used in the computation of other KPIs.
     for kpi in KPI_CLASS.instances():
         if kpi != target:
@@ -462,7 +469,8 @@ def delete_kpi(label):
             for match in matches:
                 kpi_name = re.match(r'R°([A-Za-z_]+)°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', match).group(1)
                 if kpi_name == label:
-                    raise Exception(f"KPI {label} IS USED IN THE COMPUTATION OF {_extract_label(kpi.label)}")
+                    raise ValueError(f"KPI {label} is already used in the computation of {_extract_label(kpi.label)}")
+
     
     # Remove the KPI from the ontology.
     or2.destroy_entity(target)
@@ -494,9 +502,13 @@ def add_process(process_label, process_description, steps_list):
     -----------------------------
     Raises:
     -----------------------------
-    Exception: 
-        - If the process label already exists.
-        - If any machine or operation in the steps list is undefined, not unique, or invalid.
+    ValueError:
+    - If the process label already exists in the ontology.
+    - If any machine or operation in the steps list is not unique, missing, or has multiple references.
+    
+    TypeError:
+    - If a machine or operation in the steps list does not match the expected type.
+
 
     -----------------------------
     Side Effects:
@@ -516,31 +528,32 @@ def add_process(process_label, process_description, steps_list):
     
     # Ensure exactly no match is found
     if ONTO.search(label=process_label):
-        raise Exception(f"LABEL ALREADY PRESENT: {process_label}")
-    
+        raise ValueError(f"The process label '{process_label}' already exists in the ontology. Please choose a different label.")
+
     entity_pairs = []
     for m, o in steps_list:
         # Search for the machine in the ontology.
         m_target = ONTO.search(label=m)
         # Ensure exactly one match is found; otherwise, report an error.
         if not m_target or len(m_target) > 1:
-            raise Exception(f"DOUBLE OR NONE REFERENCED MACHINE: {m}")
+            raise ValueError(f"The machine label '{m}' is either not referenced or has multiple matches in the ontology. Please ensure it is unique and defined correctly.")
         m_target = m_target[0]  # Select the first result.
         # Verify the target is a machine.
         if not isinstance(m_target, MACHINE_CASS):
-            raise Exception(f"IS NOT A VALID MACHINE: {m}")
+            raise TypeError(f"The label '{m}' refers to an invalid machine type. Expected instance of '{MACHINE_CASS}', found '{type(m_target)}'.")
         
         # Search for the operation in the ontology.
-        o_target = ONTO.search(label=o)   
+        o_target = ONTO.search(label=o)
         # Ensure exactly one match is found; otherwise, report an error.
         if not o_target or len(o_target) > 1:
-            raise Exception(f"DOUBLE OR NONE REFERENCED OPERATION: {o}")   
+            raise ValueError(f"The operation label '{o}' is either not referenced or has multiple matches in the ontology. Please ensure it is unique and defined correctly.")
         o_target = o_target[0]  # Select the first result.
         # Verify the target is an operation.
         if not isinstance(o_target, OPERATION_CLASS):
-            raise Exception(f"IS NOT A VALID OPERATION: {o}")
+            raise TypeError(f"The label '{o}' refers to an invalid operation type. Expected instance of '{OPERATION_CLASS}', found '{type(o_target)}'.")
         
         entity_pairs.append((m_target, o_target))
+
     
     # creating the process
     steps = []
@@ -580,8 +593,12 @@ def delete_process(process_label):
     -----------------------------
     Raises:
     -----------------------------
-    Exception: 
-        - If the process is undefined or not unique or If the target is not a valid process.
+    ValueError: 
+    - If the process is either missing or referenced multiple times, ensuring there is only one unique reference for the process.
+    
+    TypeError: 
+    - If the target is not a valid process or not an instance of the `PROCESS_CLASS`, meaning the target must be a valid process.
+
 
     -----------------------------
     Side Effects:
@@ -601,13 +618,13 @@ def delete_process(process_label):
     
     # Ensure exactly one match is found; otherwise, report an error.
     if not target or len(target) > 1:
-        raise Exception(f"DOUBLE OR NONE REFERENCED PROCESS: {process_label}")
-    
+        raise ValueError(f"The process '{process_label}' is either missing or referenced multiple times. Ensure there is only one unique reference.")
+
     target = target[0]  # Select the first result.
-    
+
     # Verify the target is a process.
     if not isinstance(target, PROCESS_CLASS):
-        raise Exception(f"IS NOT A VALID PROCESS: {process_label}")
+        raise TypeError(f"The specified target '{process_label}' is not a valid process. It must be an instance of the PROCESS_CLASS.")
 
     
     # Remove all process steps associated with this process.
