@@ -357,8 +357,9 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
     -----------------------------
     ValueError: 
     - If the KPI label already exists in the ontology.
-    - If the superclass is undefined or referenced multiple times.
-
+    - If the superclass is missing from the ontology.
+    RuntimeError:
+    - If the superclass is referenced multiple times, indicating a critical inconsistency in the ontology content.
     TypeError: 
     - If the superclass is not a valid KPI class or derived from it.
 
@@ -384,14 +385,16 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
 
     # Validate that the superclass is defined and unique.
     target = ONTO.search(label=superclass)
-    if not target or len(target) > 1:
-        raise ValueError(f"The superclass '{superclass}' is either missing or referenced multiple times. Ensure there is only one unique reference.")
+    if not target:
+        raise ValueError(f"No class found with the label '{superclass}'.")
+    if len(target) > 1:
+        raise RuntimeError(f"The superclass '{superclass}' is referenced multiple times.")
 
     target = target[0]
 
     # Ensure the superclass is valid (either a KPI class or derived from it).
     if not (KPI_CLASS == target or any(KPI_CLASS in cls.ancestors() for cls in target.is_a)):
-        raise TypeError(f"The specified superclass '{superclass}' is not valid. It must be either the KPI class or derived from it.")
+        raise TypeError(f"The specified superclass '{superclass}' is invalid. It must be a descendant of the KPI class.")
 
  
     # Create the KPI and assign attributes.
@@ -430,12 +433,12 @@ def delete_kpi(label):
     Raises:
     -----------------------------
     ValueError: 
-    - If more than one or no KPI is found for the given label.
+    - If no KPI is found for the given label.
     - If the KPI is used in the computation of other KPIs.
-    
+    RuntimeError:
+    - If the KPI is referenced multiple times, indicating a critical inconsistency in the ontology content.  
     TypeError: 
     - If the target is not a valid KPI (not an instance of KPI_CLASS).
-
 
     -----------------------------
     Side Effects:
@@ -453,14 +456,16 @@ def delete_kpi(label):
     target = ONTO.search(label=label)
     
     # Ensure exactly one match is found; otherwise, report an error.
-    if not target or len(target) > 1:
-        raise ValueError(f"More than one or no KPI found for label: {label}")
-
+    if not target:
+        raise ValueError(f"No KPI found with the label '{label}'.")
+    if len(target) > 1:
+        raise RuntimeError(f"The KPI '{label}' is referenced multiple times.")
+    
     target = target[0]  # Select the first result.
 
     # Verify the target is a KPI.
     if not isinstance(target, KPI_CLASS):
-        raise TypeError(f"The lable {label} refer to an entity that is not an instance of KPI_CLASS.")
+        raise TypeError(f"The specified KPI '{label}' is invalid. It must be an istance of KPI class.")
 
     # Check if the KPI is used in the computation of other KPIs.
     for kpi in KPI_CLASS.instances():
@@ -469,7 +474,7 @@ def delete_kpi(label):
             for match in matches:
                 kpi_name = re.match(r'R°([A-Za-z_]+)°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', match).group(1)
                 if kpi_name == label:
-                    raise ValueError(f"KPI {label} is already used in the computation of {_extract_label(kpi.label)}")
+                    raise ValueError(f"The KPI '{label}' cannot be deleted because it is used in the calculation of KPI '{_extract_label(kpi.label)}'.")
 
     
     # Remove the KPI from the ontology.
@@ -504,8 +509,9 @@ def add_process(process_label, process_description, steps_list):
     -----------------------------
     ValueError:
     - If the process label already exists in the ontology.
-    - If any machine or operation in the steps list is not unique, missing, or has multiple references.
-    
+    - If any machine or operation in the steps list is missing.
+    RuntimeError:
+    - If the machine label is referenced multiple times in the ontology.
     TypeError:
     - If a machine or operation in the steps list does not match the expected type.
 
@@ -528,29 +534,35 @@ def add_process(process_label, process_description, steps_list):
     
     # Ensure exactly no match is found
     if ONTO.search(label=process_label):
-        raise ValueError(f"The process label '{process_label}' already exists in the ontology. Please choose a different label.")
+        raise ValueError(f"The process '{process_label}' already exists in the ontology. Please choose a unique label.")
 
     entity_pairs = []
     for m, o in steps_list:
         # Search for the machine in the ontology.
         m_target = ONTO.search(label=m)
         # Ensure exactly one match is found; otherwise, report an error.
-        if not m_target or len(m_target) > 1:
-            raise ValueError(f"The machine label '{m}' is either not referenced or has multiple matches in the ontology. Please ensure it is unique and defined correctly.")
+        if not m_target:
+            raise ValueError(f"No machine found with the label '{m}'.")
+        if  len(m_target) > 1:
+            raise RuntimeError(f"The machine label '{m}' is referenced multiple times in the ontology.")
+        
         m_target = m_target[0]  # Select the first result.
         # Verify the target is a machine.
         if not isinstance(m_target, MACHINE_CASS):
-            raise TypeError(f"The label '{m}' refers to an invalid machine type. Expected instance of '{MACHINE_CASS}', found '{type(m_target)}'.")
+            raise TypeError(f"The specified machine '{m}' is invalid. It must be an istance of machine class.")
         
         # Search for the operation in the ontology.
         o_target = ONTO.search(label=o)
         # Ensure exactly one match is found; otherwise, report an error.
-        if not o_target or len(o_target) > 1:
-            raise ValueError(f"The operation label '{o}' is either not referenced or has multiple matches in the ontology. Please ensure it is unique and defined correctly.")
+        if not o_target:
+            raise ValueError(f"No operation found with the label '{o}'.")
+        if len(o_target) > 1:
+            raise RuntimeError(f"The operation label '{o}' is referenced multiple times in the ontology.")
+        
         o_target = o_target[0]  # Select the first result.
         # Verify the target is an operation.
         if not isinstance(o_target, OPERATION_CLASS):
-            raise TypeError(f"The label '{o}' refers to an invalid operation type. Expected instance of '{OPERATION_CLASS}', found '{type(o_target)}'.")
+            raise TypeError(f"The specified operation '{o}' is invalid. It must be an istance of operation class.")
         
         entity_pairs.append((m_target, o_target))
 
@@ -594,11 +606,11 @@ def delete_process(process_label):
     Raises:
     -----------------------------
     ValueError: 
-    - If the process is either missing or referenced multiple times, ensuring there is only one unique reference for the process.
-    
+    - If the process is not found in the ontology.
+    RuntimeError:
+    - If the process is referenced multiple times, indicating a critical inconsistency in the ontology content
     TypeError: 
-    - If the target is not a valid process or not an instance of the `PROCESS_CLASS`, meaning the target must be a valid process.
-
+    - If the target is not a valid process object.
 
     -----------------------------
     Side Effects:
@@ -617,14 +629,16 @@ def delete_process(process_label):
     target = ONTO.search(label=process_label)
     
     # Ensure exactly one match is found; otherwise, report an error.
-    if not target or len(target) > 1:
-        raise ValueError(f"The process '{process_label}' is either missing or referenced multiple times. Ensure there is only one unique reference.")
-
+    if not target:
+        raise ValueError(f"No process found with the label '{process_label}'.")
+    if len(target) > 1:
+        raise RuntimeError(f"The process '{process_label}' is referenced multiple times.")
+    
     target = target[0]  # Select the first result.
 
     # Verify the target is a process.
     if not isinstance(target, PROCESS_CLASS):
-        raise TypeError(f"The specified target '{process_label}' is not a valid process. It must be an instance of the PROCESS_CLASS.")
+        raise TypeError(f"The specified process '{process_label}' is invalid. It must be an istance of process class.")
 
     
     # Remove all process steps associated with this process.
@@ -661,8 +675,8 @@ def add_operation(label, description):
     -----------------------------
     Raises:
     -----------------------------
-    Exception: 
-        - If the operation label already exists.
+    ValueError: 
+    - If the operation label already exists.
 
     -----------------------------
     Side Effects:
@@ -678,7 +692,7 @@ def add_operation(label, description):
     """
     # Validate that the operation label does not already exist.
     if ONTO.search(label=label):
-        raise Exception(f'OPERATION ALREADY EXISTS: {label}')
+        raise ValueError(f"Operation '{label}' already exists in the ontology. Please choose a unique label.")
     
     # Create the operation and assign attributes.
     new_el = OPERATION_CLASS(_generate_hash_code(label))
@@ -706,10 +720,13 @@ def delete_operation(label):
     -----------------------------
     Raises:
     -----------------------------
-    Exception: 
-        - If the operation is undefined or not unique.
-        - If the target is not a valid operation.
-        - If the operation is used in process steps.
+    ValueError:
+    - If no operation is found for the given label.
+    - If the operation is used in any process steps.
+    RuntimeError:
+    - If the operation is referenced multiple times, indicating a critical inconsistency in the ontology content.
+    TypeError:
+    - If the target is not a valid operation.
 
     -----------------------------
     Side Effects:
@@ -727,19 +744,23 @@ def delete_operation(label):
     target = ONTO.search(label=label)
     
     # Ensure exactly one match is found; otherwise, report an error.
-    if not target or len(target) > 1:
-        raise Exception(f"DOUBLE OR NONE REFERENCED OPERATION: {label}")
-    
+    if not target:
+        raise ValueError(f"No operation found with the label '{label}'.")
+    elif len(target) > 1:
+        raise RuntimeError(f"The operation '{label}' is referenced multiple times.")
+
     target = target[0]  # Select the first result.
-    
+
     # Verify the target is an operation.
     if not isinstance(target, OPERATION_CLASS):
-        raise Exception(f"IS NOT A VALID OPERATION: {label}")
-    
-    # Check if the KPI is used in the computation of other KPIs.
+        raise TypeError(f"The specified operation '{label}' is invalid. It must be an istance of operation class.")
+
+    # Check if the operation is used in the computation of other KPIs.
     for mo in MACHINE_OPERATION_CLASS.instances():
         if target in ASSOCIATED_OPERATION[mo]:
-            raise Exception(f"OPERATION {label} IS USED IN THE PROCESS_STEP {_extract_label(mo.label)}")
+            raise ValueError(
+                f"The operation '{label}' cannot be deleted because it is used in the process step: {_extract_label(mo.label)}"
+            )
                 
     # Remove the operation from the ontology.
     or2.destroy_entity(target)
@@ -773,10 +794,13 @@ def get_formulas(kpi):
     -----------------------------
     Raises:
     -----------------------------
-    Exception: 
-        - If the KPI is undefined or not unique.
-        - If the KPI label is invalid.
-        - If a referenced KPI in the formula is undefined or invalid.
+    ValueError:
+    - If no KPI is found for the given label.
+    RuntimeError:
+    - If the KPI is referenced multiple times, indicating a critical inconsistency in the ontology content.
+    - If a KPI referenced by a formula is not found.
+    TypeError:
+    - If the target is not a valid KPI.
 
     -----------------------------
     Side Effects:
@@ -792,14 +816,16 @@ def get_formulas(kpi):
     target = ONTO.search(label=kpi)
     
     # Ensure exactly one match is found; otherwise, report an error.
-    if not target or len(target) > 1:
-        raise Exception(f"DOUBLE OR NONE REFERENCED KPI: {kpi}")
+    if not target:
+        raise ValueError(f"No KPI found with the label '{kpi}'.")
+    if len(target) > 1:
+        raise RuntimeError(f"The KPI '{kpi}' is referenced multiple times.")
     
     target = target[0]  # Select the first result.
     
     # Verify the target is a KPI.
     if not any(issubclass(cls, KPI_CLASS) for cls in target.is_a):
-        raise Exception(f"IS NOT A VALID KPI: {kpi}")
+        raise TypeError(f"The specified KPI '{kpi}' is invalid. It must be an istance of KPI class.")
     
     # Initialize lists for formulas to unroll and store resolved formulas.
     to_unroll = [PARSABLE_FORMULA[target][0]]
@@ -816,9 +842,11 @@ def get_formulas(kpi):
             kpi_name = re.match(r'R°([A-Za-z_]+)°[A-Za-z_]*°[A-Za-z_]*°[A-Za-z_]*°', match).group(1)
             target = ONTO.search(label=kpi_name)
             
-            if not target or len(target) > 1:
-                # this exception is raised only if some formula is wrong
-                raise Exception(f"DOUBLE OR NONE REFERENCED KPI: {kpi_name}")
+            # Ensure exactly one match is found; otherwise, report an error.
+            if not target:
+                raise RuntimeError(f"No KPI found with the label '{kpi_name}'.")
+            if len(target) > 1:
+                raise RuntimeError(f"The KPI '{kpi_name}' is referenced multiple times.")
             
             target = target[0]
             to_unroll.append(PARSABLE_FORMULA[target][0])
@@ -848,11 +876,6 @@ def get_closest_kpi_formulas(kpi, method='custom'):
     - tuple: 
         - dict: A dictionary mapping KPI labels to their formulas.
         - float: The similarity score (1 for exact matches).
-
-    -----------------------------
-    Raises:
-    -----------------------------
-    None directly. It handles missing KPIs by searching for the closest match.
 
     -----------------------------
     Side Effects:
@@ -914,17 +937,22 @@ def get_instances(owl_class_label):
     -----------------------------
     Raises:
     -----------------------------
-    Exception: 
-        If no matches or multiple matches are found for the provided label.
-        If the input is neither a class nor an individual.
+    ValueError:
+    - If no instances are found.
+    RuntimeError:
+    - If multiple matches are found.
+    TypeError:
+    - If the input does not correspond to a class or individual.
     """
     # Search for the class or individual in the ontology using the provided label.
     target = ONTO.search(label=owl_class_label)
     
     # Validate that the search returned a unique result.
-    if not target or len(target) > 1:
+    if not target:
         # Error if none or multiple matches found.
-        raise Exception(f"DOUBLE OR NONE REFERENCED ENTITY: {owl_class_label}")
+        raise ValueError(f"No matches found for the label '{owl_class_label}'.")
+    if len(target) > 1:
+        raise RuntimeError(f"Multiple matches found for the label '{owl_class_label}'.")
     
     target = target[0]  # Extract the single match.
     instances = set()  # Initialize a set to store the instances.
@@ -946,7 +974,7 @@ def get_instances(owl_class_label):
         instances.add(owl_class_label)
     else:
         # If the input is neither a class nor an individual, print an error message.
-        raise Exception(f"INPUT IS NEITHER A CLASS NOR AN INSTANCE: {owl_class_label}")
+        raise TypeError(f"The provided label '{owl_class_label}' does not correspond to a class or individual.")
     
     # Return the list of instances found.
     return list(instances)
@@ -984,12 +1012,6 @@ def get_closest_class_instances(owl_class_label, istances_type='a', method='leve
     - tuple: 
         - list: Instances of the closest matching class or individual.
         - float: Similarity score of the closest match.
-
-    -----------------------------
-    Raises:
-    -----------------------------
-    Exception: 
-        If no instances are found or if the similarity computation fails.
     """
     
     # Attempt to retrieve the instances of the exact class or individual.
@@ -1072,12 +1094,22 @@ def get_object_properties(owl_label):
         - 'instances': List of instances of the element (for classes).
         - 'entity_type': The nature of the referred entity which can be class, instance or property.
         - 'ontology_property_name': List of every entity related to the referenced entity with the 'ontology_property_name' property.
+    
+    -----------------------------
+    Raises:
+    -----------------------------
+    ValueError:
+    - If no macthes are found.
+    RuntimeError:
+    - If the element is referenced multiple times.
     """
     # Search for the target element using its label in the ontology.
     target = ONTO.search(label=owl_label)
     
-    if not target or len(target) > 1:
-        raise Exception(f"DOUBLE OR NONE REFERENCED KPI: {owl_label}")
+    if not target:
+        raise ValueError(f"No matches found with the label '{owl_label}'.")
+    if len(target) > 1:
+        raise RuntimeError(f"The element '{owl_label}' is referenced multiple times.")
     
     target = target[0]  # Extract the single matching element.
     
@@ -1228,8 +1260,12 @@ def get_steps(process_label):
     Raises:
     -----------------------------
     Exception: 
-        - If no process or more than one process is found with the given label.
-        - If the found target is not a valid process.
+    ValueError:
+    - If no process is found for the given label.
+    RuntimeError:
+    - If the process is referenced multiple times.
+    TypeError:
+    - If the target is not a valid process object.
     """
     
     
@@ -1237,14 +1273,16 @@ def get_steps(process_label):
     target = ONTO.search(label=process_label)
     
     # Ensure exactly one match is found; otherwise, report an error.
-    if not target or len(target) > 1:
-        raise Exception(f"DOUBLE OR NONE REFERENCED PROCESS: {process_label}")
+    if not target:
+        raise Exception(f"No process found with the label '{process_label}'.")
+    if len(target) > 1:
+        raise RuntimeError(f"The process '{process_label}' is referenced multiple times.")
     
     target = target[0]  # Select the first result.
     
     # Verify the target is a process.
     if not isinstance(target, PROCESS_CLASS):
-        raise Exception(f"IS NOT A VALID PROCESS: {process_label}")
+        raise TypeError(f"The specified process '{process_label}' is invalid. It must be an istance of process class.")
     
     steps = []
     for s in PROCESS_STEP[target]:
