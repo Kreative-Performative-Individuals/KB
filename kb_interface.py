@@ -1030,20 +1030,20 @@ def get_closest_class_instances(owl_class_label, istances_type='a', method='leve
         if istances_type == 'a':
             # not machine_operation because are subordinated to process
             class_to_check = [KPI_CLASS, MACHINE_CASS, OPERATION_CLASS, PROCESS_CLASS]
-            instaces_to_check = list(KPI_CLASS.instances()) + list(MACHINE_CASS.instances()) + \
-                        list(OPERATION_CLASS.instances()) + list(PROCESS_CLASS.instances())
+            instaces_to_check = list(KPI_CLASS.subclasses()) + list(MACHINE_CASS.subclasses()) + \
+                        list(OPERATION_CLASS.subclasses()) + list(PROCESS_CLASS.subclasses())
         elif istances_type == 'k':
             class_to_check = [KPI_CLASS]
-            instaces_to_check = list(KPI_CLASS.instances())
+            instaces_to_check = list(KPI_CLASS.subclasses())
         elif istances_type == 'm':
             class_to_check = [MACHINE_CASS]
-            instaces_to_check = list(MACHINE_CASS.instances())
+            instaces_to_check = list(MACHINE_CASS.subclasses())
         elif istances_type == 'o':
             class_to_check = [OPERATION_CLASS]
-            instaces_to_check = list(OPERATION_CLASS.instances())
+            instaces_to_check = list(OPERATION_CLASS.subclasses())
         elif istances_type == 'p':
             class_to_check = [PROCESS_CLASS]
-            instaces_to_check = list(PROCESS_CLASS.instances())
+            instaces_to_check = list(PROCESS_CLASS.subclasses())
         
         # Iterate over all classes in class_to_check.
         for cl in class_to_check:
@@ -1064,6 +1064,7 @@ def get_closest_class_instances(owl_class_label, istances_type='a', method='leve
                 max_label = _extract_label(ind.label)
         
         # Retrieve the instances of the closest matching label and return them.
+        print(max_label)
         return get_instances(max_label), max_val
         
 
