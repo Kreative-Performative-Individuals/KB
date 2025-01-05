@@ -1025,30 +1025,32 @@ def get_closest_class_instances(owl_class_label, istances_type='a', method='leve
     # If no instances are found, look for the closest match.
         max_val = -math.inf  # Initialize the highest similarity score.
         max_label = ''  # Initialize the label of the closest match.
-
+        class_bias = 0.25 # Bias to increase base similarity with classes label
 
         if istances_type == 'a':
             # not machine_operation because are subordinated to process
-            class_to_check = [KPI_CLASS, MACHINE_CASS, OPERATION_CLASS, PROCESS_CLASS]
-            instaces_to_check = list(KPI_CLASS.subclasses()) + list(MACHINE_CASS.subclasses()) + \
-                        list(OPERATION_CLASS.subclasses()) + list(PROCESS_CLASS.subclasses())
+            class_to_check = [KPI_CLASS, MACHINE_CASS, OPERATION_CLASS, PROCESS_CLASS] + list(KPI_CLASS.subclasses()) + \
+                            list(MACHINE_CASS.subclasses()) + list(OPERATION_CLASS.subclasses()) + list(PROCESS_CLASS.subclasses())
+            
+            instaces_to_check = list(KPI_CLASS.instances()) + list(MACHINE_CASS.instances()) + \
+                                list(OPERATION_CLASS.instances()) + list(PROCESS_CLASS.instances())
         elif istances_type == 'k':
-            class_to_check = [KPI_CLASS]
-            instaces_to_check = list(KPI_CLASS.subclasses())
+            class_to_check = [KPI_CLASS] + list(KPI_CLASS.subclasses())
+            instaces_to_check = list(KPI_CLASS.instances())
         elif istances_type == 'm':
-            class_to_check = [MACHINE_CASS]
-            instaces_to_check = list(MACHINE_CASS.subclasses())
+            class_to_check = [MACHINE_CASS] + list(MACHINE_CASS.subclasses())
+            instaces_to_check = list(MACHINE_CASS.instances())
         elif istances_type == 'o':
-            class_to_check = [OPERATION_CLASS]
-            instaces_to_check = list(OPERATION_CLASS.subclasses())
+            class_to_check = [OPERATION_CLASS] + list(OPERATION_CLASS.subclasses())
+            instaces_to_check = list(OPERATION_CLASS.instances())
         elif istances_type == 'p':
-            class_to_check = [PROCESS_CLASS]
-            instaces_to_check = list(PROCESS_CLASS.subclasses())
+            class_to_check = [PROCESS_CLASS] + list(PROCESS_CLASS.subclasses())
+            instaces_to_check = list(PROCESS_CLASS.instances())
         
         # Iterate over all classes in class_to_check.
         for cl in class_to_check:
             # Compute the similarity between the input and the current class label.
-            similarity = _get_similarity(owl_class_label, _extract_label(cl.label), method)
+            similarity = _get_similarity(owl_class_label, _extract_label(cl.label), method) + class_bias
             # Update the closest match if the similarity is higher.
             if max_val < similarity:
                 max_val = similarity
