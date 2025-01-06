@@ -24,9 +24,9 @@ class KPIData(BaseModel):
     description: str
     unit_of_measure: str
     parsable_computation_formula: str
-    human_readable_formula: Optional[str] = None  # Optional field, can be None
-    depends_on_machine: bool = False  # Default value set to False
-    depends_on_operation: bool = False  # Default value set to False
+    human_readable_formula: Optional[str] = None
+    depends_on_machine: bool = False
+    depends_on_operation: bool = False
 
 @app.get("/")
 def root():
@@ -62,10 +62,16 @@ def get_all_formulas():
 @app.post("/add_kpi/")
 def add_kpi(kpi: KPIData):
     try:
-        kbi.add_kpi(kpi.superclass, kpi.label, kpi.description, kpi.unit_of_measure, 
+        return kbi.add_kpi(kpi.superclass, kpi.label, kpi.description, kpi.unit_of_measure,
                     kpi.parsable_computation_formula, kpi.human_readable_formula, 
                     kpi.depends_on_machine, kpi.depends_on_operation)
-        return {"message": "kpi added"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/remove_kpi/")
+def remove_kpi(kpi_label: str):
+    try:
+        return kbi.remove_kpi(kpi_label)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

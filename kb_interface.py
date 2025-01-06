@@ -152,7 +152,7 @@ def _backup():
             os.remove(str(MAIN_DIR / (str(SAVE_INT - max_fine_b) + '.owl')))
 
     # Increment the save interval and update the configuration file
-    SAVE_INT += 1
+    # SAVE_INT += 1
     with open(CONFIG_PATH, 'w+') as cfg:
         cfg.write(str(SAVE_INT))
     
@@ -173,7 +173,7 @@ def _fix():
     ONTO.save(file='./new_onto_test.owl', format="rdfxml")
 
 
- 
+
  
 def get_formulas(kpi):
     """
@@ -293,20 +293,20 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
     # Validate that the KPI label does not already exist.
     if ONTO.search(label=label):
         print('KPI', label, 'ALREADY EXISTS')
-        return
+        return {"message": "KPI already exists", "status": 400}
     
     # Validate that the superclass is defined and unique.
     target = ONTO.search(label=superclass)
     if not target or len(target) > 1:
         print("DOUBLE OR NONE REFERENCED KPI")
-        return
+        return {"message": "DOUBLE OR NONE REFERENCED KPI", "status": 400}
     
     target = target[0]
     
     # Ensure the superclass is valid (either a KPI class or derived from it).
     if not (KPI_CLASS == target or any(KPI_CLASS in cls.ancestors() for cls in target.is_a)):
         print("NOT A VALID SUPERCLASS")
-        return
+        return {"message": "KPI Superclass is invalid", "status": 400}
     
     # Create the KPI and assign attributes.
     new_el = target(_generate_hash_code(label))
@@ -326,7 +326,41 @@ def add_kpi(superclass, label, description, unit_of_measure, parsable_computatio
     
     _backup()  # Save changes.
     print('KPI', label, 'successfully added to the ontology!')
+    return {"message": f"KPI {label} successfully added to the ontology!", "status": 200}
 
+
+def remove_kpi(label):
+    """
+    Removes a KPI from the ontology.
+
+    This function searches for the KPI with the given label and removes it from the ontology.
+
+    Parameters:
+    - label (str): The label of the KPI to remove.
+
+    Returns:
+    - None: Prints errors or removes the KPI instance.
+    """
+    # Search for the KPI in the ontology.
+    target = ONTO.search(label=label)
+
+    # Ensure exactly one match is found; otherwise, report an error.
+    if not target or len(target) > 1:
+        print("DOUBLE OR NONE REFERENCED KPI")
+        return {"message": "DOUBLE OR NONE REFERENCED KPI", "status": 400}
+
+    target = target[0]  # Select the first result.
+
+    # Verify the target is a KPI.
+    if not any(issubclass(cls, KPI_CLASS) for cls in target.is_a):
+        print(label,"IS NOT A VALID KPI")
+        return {"message": f"{label} is not a valid KPI", "status": 400}
+
+    # Remove the KPI from the ontology.
+    or2.destroy_entity(target)
+    _backup()  # Save changes.
+    print('KPI', label, 'successfully removed from the ontology!')
+    return {"message": f"KPI {label} successfully removed from the ontology!", "status": 200}
 
 
 def get_instances(owl_class_label):
